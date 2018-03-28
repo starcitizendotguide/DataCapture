@@ -36,6 +36,7 @@ public class SCPC implements Runnable {
         try {
             address = InetAddress.getByName(this.addressInput);
         } catch (UnknownHostException e) {
+            e.printStackTrace();
             Utils.popup("Error", "Invalid IP Address.", Alert.AlertType.ERROR, true);
         }
 
@@ -43,7 +44,13 @@ public class SCPC implements Runnable {
         try {
             networkInterface = Pcaps.getDevByAddress(address);
         } catch (PcapNativeException e) {
+            e.printStackTrace();
             this.main.setStatusText("An popup occured in the pcap native library. [Pcaps#getDevByAddress]", Alert.AlertType.ERROR);
+        }
+
+        if(networkInterface == null) {
+            Utils.popup("Error", "Couldn't find a network interface.", Alert.AlertType.ERROR, true);
+            return;
         }
 
         final int SNAP_LEN = 65536;
@@ -57,6 +64,7 @@ public class SCPC implements Runnable {
             this.main.setStatusText("An popup occured in the pcap native library. [PcapNetworkInterface#openLive]", Alert.AlertType.ERROR);
             return;
         }
+
         while (handle.isOpen()) {
 
             Packet packet = null;
@@ -65,10 +73,14 @@ public class SCPC implements Runnable {
             } catch (NotOpenException e) {
                 this.main.setStatusText("The handle is not open.", Alert.AlertType.ERROR);
             } catch (IllegalArgumentException ignore) {
+                ignore.printStackTrace();
                 //--- No Clue @TODO
             }
 
-            if (packet == null) continue;
+            if (packet == null) {
+                System.out.println("Packet is null.");
+                continue;
+            }
 
             if (packet.contains(IpV4Packet.class)) {
                 String raw = new String(packet.getPayload().getRawData());
