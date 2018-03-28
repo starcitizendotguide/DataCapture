@@ -7,6 +7,7 @@ import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import org.pcap4j.core.*;
 import org.pcap4j.packet.IpV4Packet;
+import org.pcap4j.packet.IpV6Packet;
 import org.pcap4j.packet.Packet;
 
 import java.net.InetAddress;
@@ -82,7 +83,7 @@ public class SCPC implements Runnable {
                 continue;
             }
 
-            if (packet.contains(IpV4Packet.class)) {
+            if (packet.contains(IpV4Packet.class) || packet.contains(IpV6Packet.class)) {
                 String raw = new String(packet.getPayload().getRawData());
 
                 Matcher matcher = pattern.matcher(raw);
