@@ -67,7 +67,7 @@ public class DataPoint {
         VEHICLES_AI {
             @Override
             public String getName() {
-                return "Vehicles AI";
+                return "Vehicles (AI)";
             }
 
             @Override

@@ -104,6 +104,7 @@ public class SCPC implements Runnable {
                     } else if(event.equals("Game Quit")) {
                         this.main.setStatusText("Star Citizen closed", Alert.AlertType.INFORMATION);
                         handle.close();
+                        this.main.start(this.addressInput);
                     } else {
                         System.out.println("Event: " + event);
                     }

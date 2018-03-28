@@ -136,8 +136,12 @@ public class Main extends Application {
             }
         }
 
-        this.threadPool.execute(new SCPC(this, this.capture, address));
+        this.start(address);
 
+    }
+
+    public void start(String address) {
+        this.threadPool.execute(new SCPC(this, this.capture, address));
     }
 
     public static void main(String[] args) {
