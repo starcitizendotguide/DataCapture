@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 
 public class SCPC implements Runnable {
 
+    private final static Pattern pattern = Pattern.compile("^(.+)(Host: launcher2\\.robertsspaceindustries\\.com).+(User-Agent: libcurl-agent\\/[0-9]\\.[0-9]).+(Accept: application\\/json).+(Content-Type: application\\/json).+(Content-Length: [0-9]+)(.+)$", Pattern.DOTALL);
     private final static Gson gson = new Gson();
 
     private final Main main;
@@ -72,7 +73,6 @@ public class SCPC implements Runnable {
             if (packet.contains(IpV4Packet.class)) {
                 String raw = new String(packet.getPayload().getRawData());
 
-                Pattern pattern = Pattern.compile("^(.+)(Host: launcher2\\.robertsspaceindustries\\.com).+(User-Agent: libcurl-agent\\/[0-9]\\.[0-9]).+(Accept: application\\/json).+(Content-Type: application\\/json).+(Content-Length: [0-9]+)(.+)$", Pattern.DOTALL);
                 Matcher matcher = pattern.matcher(raw);
 
                 if (matcher.matches() && matcher.groupCount() == 7) {
