@@ -23,6 +23,10 @@ public class DataPoint {
         this.time = time;
     }
 
+    public Map<Type, Number> getData() {
+        return this.data;
+    }
+
     public GameState getGameState() {
         return this.gameState;
     }

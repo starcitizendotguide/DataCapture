@@ -83,8 +83,7 @@ public class CaptureDevice implements Runnable {
                 Utils.popup("Exception", "The handle is not open.", Alert.AlertType.ERROR, false);
                 return;
             } catch (IllegalArgumentException ignore) {
-                ignore.printStackTrace();
-                //--- No Clue @TODO
+                System.out.println(":UnexplainableError ");
             }
 
             if (packet == null) {
@@ -149,34 +148,38 @@ public class CaptureDevice implements Runnable {
                     GameState finalGameState = gameState;
 
                     //--- Heartbeat
-                    if(event.equals("Heartbeat")) {
-                        Platform.runLater(() -> {
-                            DataPoint dataPoint = new DataPoint(finalGameState, finalCaptureTab.getCaptureSession().getDataPoints().size());
-                            for (DataPoint.Type type : DataPoint.Types.values()) {
-                                dataPoint.add(type, finalObject.get(type.getPacketKey()).getAsNumber());
-                            }
-                            finalCaptureTab.getCaptureSession().add(dataPoint);
-                        });
-                    }
-                    //--- BOOT: GPU DESCRIPTION
-                    else if(event.equals("boot_gpu_desc")) {
-                        captureTab.setStatusText("Star Citizen is booting...", Alert.AlertType.INFORMATION);
+                    switch (event) {
+                        case "Heartbeat":
+                            Platform.runLater(() -> {
+                                DataPoint dataPoint = new DataPoint(finalGameState, finalCaptureTab.getCaptureSession().getDataPoints().size());
+                                for (DataPoint.Type type : DataPoint.Types.values()) {
+                                    dataPoint.add(type, finalObject.get(type.getPacketKey()).getAsNumber());
+                                }
+                                finalCaptureTab.getCaptureSession().add(dataPoint);
+                            });
+                            break;
+                        //--- BOOT: GPU DESCRIPTION
+                        case "boot_gpu_desc":
+                            captureTab.setStatusText("Star Citizen is booting...", Alert.AlertType.INFORMATION);
 
-                        GPUInformation gpuInformation = new GPUInformation();
-                        for(DataPoint.Type type : GPUInformation.Types.values()) {
-                            if(finalObject.has(type.getPacketKey())) {
-                                gpuInformation.add(type, finalObject.get(type.getPacketKey()).getAsString());
-                            } else {
-                                System.out.println(String.format("boot_gpu_desc is missing '%s'", type.getPacketKey()));
+                            GPUInformation gpuInformation = new GPUInformation();
+                            for (DataPoint.Type type : GPUInformation.Types.values()) {
+                                if (finalObject.has(type.getPacketKey())) {
+                                    gpuInformation.add(type, finalObject.get(type.getPacketKey()).getAsString());
+                                } else {
+                                    System.out.println(String.format("boot_gpu_desc is missing '%s'", type.getPacketKey()));
+                                }
                             }
-                        }
-                        captureTab.getCaptureSession().setGPUInformation(gpuInformation);
+                            captureTab.getCaptureSession().setGPUInformation(gpuInformation);
 
-                    } else if(event.equals("Game Quit")) {
-                        System.out.println("Game Quit -> " + payload);
-                        captureTab.setStatusText("Star Citizen closed", Alert.AlertType.INFORMATION);
-                    } else {
-                        System.out.println("Event: " + event);
+                            break;
+                        case "Game Quit":
+                            System.out.println("Game Quit -> " + payload);
+                            captureTab.setStatusText("Star Citizen closed", Alert.AlertType.INFORMATION);
+                            break;
+                        default:
+                            System.out.println("Event: " + event + " -> " + payload);
+                            break;
                     }
 
                 }

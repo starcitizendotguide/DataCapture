@@ -1,5 +1,11 @@
 package de.sweetcode.scpc.data;
 
+import javafx.scene.image.Image;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.LinearGradient;
+import javafx.scene.paint.Stop;
+
 import java.util.stream.Stream;
 
 public enum GameStates implements GameState {
@@ -11,8 +17,18 @@ public enum GameStates implements GameState {
         }
 
         @Override
+        public Image getBackground() {
+            return null;
+        }
+
+        @Override
         public boolean detect(String map) {
-            return (map != null && (map.equals("nomap") || map.equals("nolevel")));
+            return (map != null && (map.equalsIgnoreCase("nomap") || map.equalsIgnoreCase("nolevel")));
+        }
+
+        @Override
+        public LinearGradient getBackgroundGradient() {
+            return null;
         }
     },
     MENU {
@@ -22,30 +38,102 @@ public enum GameStates implements GameState {
         }
 
         @Override
+        public Image getBackground() {
+            return null;
+        }
+
+        @Override
         public boolean detect(String map) {
-            return (map != null && map.equals("frontend_main"));
+            return (map != null && map.equalsIgnoreCase("frontend_main"));
+        }
+
+        @Override
+        public LinearGradient getBackgroundGradient() {
+            return null;
+        }
+    },
+    PU {
+
+        private final Image image = new Image("pu.jpg");
+        private final LinearGradient linearGrad = new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE,
+                new Stop(0.1f, Color.rgb(255, 0, 0, .3)),
+                new Stop(0.5f, Color.rgb(127, 0, 127, .3)),
+                new Stop(1.0f, Color.rgb(0, 0, 255, .3)));
+
+        @Override
+        public String getName() {
+            return "Public Universe";
+        }
+
+        @Override
+        public Image getBackground() {
+            return this.image;
+        }
+
+        @Override
+        public boolean detect(String map) {
+            return (map != null && map.equalsIgnoreCase("pu"));
+        }
+
+        @Override
+        public LinearGradient getBackgroundGradient() {
+            return this.linearGrad;
         }
     },
     STAR_MARINE {
+
+        private final Image image = new Image("sm.jpg");
+        private final LinearGradient linearGrad = new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE,
+                new Stop(0.1f, Color.rgb(249, 248, 113, 0.302)),
+                new Stop(0.5f, Color.rgb(255, 199, 95, 0.302)),
+                new Stop(1.0f, Color.rgb(255, 150, 113, 0.302)));
+
         @Override
         public String getName() {
             return "Star Marine";
         }
 
         @Override
+        public Image getBackground() {
+            return this.image;
+        }
+
+        @Override
         public boolean detect(String map) {
-            return (map != null && (map.equals("fps_echo11")) || map.equals("fps_demien"));
+            return (map != null && (map.equalsIgnoreCase("fps_echo11")) || map.equalsIgnoreCase("fps_demien"));
+        }
+
+        @Override
+        public LinearGradient getBackgroundGradient() {
+            return this.linearGrad;
         }
     },
     ARENA_COMMANDER {
+
+        private final Image image = new Image("ac.jpg");
+        private final LinearGradient linearGrad = new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE,
+                new Stop(0.1f, Color.rgb(194, 94, 94, 0.302)),
+                new Stop(0.5f, Color.rgb(96, 84, 125, 0.302)),
+                new Stop(1.0f, Color.rgb(47, 72, 88, 0.302)));
+
         @Override
         public String getName() {
             return "Arena Commander";
         }
 
         @Override
+        public Image getBackground() {
+            return this.image;
+        }
+
+        @Override
         public boolean detect(String map) {
-            return (map != null && (map.equals("dfm_brokenmoon")) || map.equals("dfm_dyingstar"));
+            return (map != null && (map.equalsIgnoreCase("dfm_brokenmoon")) || map.equalsIgnoreCase("dfm_dyingstar") || map.equalsIgnoreCase("dfm_newhorizonspeedway"));
+        }
+
+        @Override
+        public LinearGradient getBackgroundGradient() {
+            return this.linearGrad;
         }
     },
     UNKNOWN {
@@ -55,8 +143,18 @@ public enum GameStates implements GameState {
         }
 
         @Override
+        public Image getBackground() {
+            return null;
+        }
+
+        @Override
         public boolean detect(String map) {
             return false;
+        }
+
+        @Override
+        public LinearGradient getBackgroundGradient() {
+            return null;
         }
     };
 

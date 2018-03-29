@@ -37,6 +37,10 @@ public class CaptureSession {
         return this.sessionId;
     }
 
+    public DataPoint get(int index) {
+        return this.dataPoints.get(index);
+    }
+
     /**
      * All data points.
      * @return A LinkedList, never null, but can be empty.
