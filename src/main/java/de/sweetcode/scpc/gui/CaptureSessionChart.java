@@ -45,8 +45,7 @@ public class CaptureSessionChart {
     }
 
     public void forceDraw() {
-        this.lineChart.getData().clear();
-        this.seriesMap.clear();
+        this.seriesMap.forEach((k, v) -> v.getData().clear());
 
         this.captureSession.getDataPoints().forEach(dataPoint -> {
             for (DataPoint.Type type : DataPoint.Types.values()) {

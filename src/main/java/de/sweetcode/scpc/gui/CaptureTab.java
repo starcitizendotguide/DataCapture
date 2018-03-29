@@ -4,6 +4,7 @@ import de.sweetcode.scpc.Main;
 import de.sweetcode.scpc.data.CaptureSession;
 import de.sweetcode.scpc.data.DataPoint;
 import de.sweetcode.scpc.data.GPUInformation;
+import de.sweetcode.scpc.data.GameState;
 import de.sweetcode.scpc.handlers.FileSaveAsActionEvent;
 import de.sweetcode.scpc.handlers.TabCloseEvent;
 import javafx.application.Platform;
@@ -30,7 +31,8 @@ public class CaptureTab extends Tab {
     private Label gpuLabel = new Label("GPU: -");
     private Label fpsLabel = new Label("FPS: -");
     private Label packagesCapturedLabel = new Label("Packages Captured: -");
-    private Label isCapturingLabel = new Label("-");
+    private Label statusLabel = new Label("-");
+    private Label gameStateLabel = new Label("Game State: -");
 
     /**
      * @param main The main instance of the program.
@@ -73,11 +75,11 @@ public class CaptureTab extends Tab {
 
         Platform.runLater(() -> {
             if(status == Alert.AlertType.ERROR) {
-                this.isCapturingLabel.setTextFill(Color.web("#EE3F3F"));
-                this.isCapturingLabel.setText(String.format("Error: %s", statusText));
+                this.statusLabel.setTextFill(Color.web("#EE3F3F"));
+                this.statusLabel.setText(String.format("Error: %s", statusText));
             } else {
-                this.isCapturingLabel.setTextFill(Color.web("#89AD83"));
-                this.isCapturingLabel.setText(String.format("Status: %s", statusText));
+                this.statusLabel.setTextFill(Color.web("#89AD83"));
+                this.statusLabel.setText(String.format("Status: %s", statusText));
             }
         });
 
@@ -114,16 +116,19 @@ public class CaptureTab extends Tab {
         infoLabels.setAlignment(Pos.CENTER);
         infoLabels.setSpacing(20);
 
-        infoLabels.getChildren().add(this.fpsLabel);
-        infoLabels.getChildren().add(this.gpuLabel);
-        infoLabels.getChildren().add(this.packagesCapturedLabel);
-        infoLabels.getChildren().add(this.isCapturingLabel);
+        infoLabels.getChildren().addAll(
+                this.fpsLabel,
+                this.gpuLabel,
+                this.packagesCapturedLabel,
+                this.statusLabel,
+                this.gameStateLabel
+        );
         pane.setBottom(infoLabels);
 
         this.captureSession.addListener(DataPoint.class, dataPoint -> {
             Platform.runLater(() -> {
                 this.fpsLabel.setText(String.format("FPS: %d", dataPoint.getData(DataPoint.Types.FPS).getYValue().intValue()));
-                packagesCapturedLabel.setText(String.format("Packages Captured: %d", this.captureSession.getDataPoints().size()));
+                this.packagesCapturedLabel.setText(String.format("Packages Captured: %d", this.captureSession.getDataPoints().size()));
                 this.setStatusText("Capturing...", Alert.AlertType.INFORMATION);
             });
         });
@@ -132,6 +137,10 @@ public class CaptureTab extends Tab {
             Platform.runLater(() -> {
                 this.gpuLabel.setText("GPU: " + gpuInformation.getValue(GPUInformation.Types.GPU_NAME));
             });
+        });
+
+        this.captureSession.addListener(GameState.class, gameState -> {
+            Platform.runLater(() -> this.gameStateLabel.setText(String.format("Game State: %s", gameState.getName())));
         });
 
         //---

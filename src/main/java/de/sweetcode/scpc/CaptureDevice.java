@@ -3,9 +3,7 @@ package de.sweetcode.scpc;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
-import de.sweetcode.scpc.data.CaptureSession;
-import de.sweetcode.scpc.data.DataPoint;
-import de.sweetcode.scpc.data.GPUInformation;
+import de.sweetcode.scpc.data.*;
 import de.sweetcode.scpc.gui.CaptureTab;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
@@ -109,11 +107,21 @@ public class CaptureDevice implements Runnable {
 
                     if(object == null) continue;
 
+                    GameState gameState = GameStates.UNKNOWN;
                     final String event = object.get("Event").getAsString();
-
                     final JsonObject finalObject = object;
                     CaptureTab captureTab = null;
 
+                    //--- Determine GameState
+                    if(finalObject.has("map")) {
+                       gameState = GameStates.byMap(finalObject.get("map").getAsString());
+
+                        if(gameState == GameStates.UNKNOWN) {
+                            System.out.println(String.format("Unhandled Game State: '%s' ", finalObject.get("map").getAsString()));
+                        }
+                    }
+
+                    //--- Session Handling
                     if(finalObject.has("sessionid")) {
                         long sessionId = finalObject.get("sessionid").getAsLong();
 
@@ -125,10 +133,11 @@ public class CaptureDevice implements Runnable {
                             Platform.runLater(() -> finalCaptureTab1.setText(String.format("Session - %d", sessionId)));
                         } else if(this.main.hasSession(sessionId)) {
                             captureTab = this.main.getCaptureTab(sessionId);
-                        } else if(!(this.main.hasSession(sessionId))) {
+                        } else if(!(this.main.hasSession(sessionId)) && !(event.equals("Game Quit"))) {
                             this.main.addCaptureSession(new CaptureSession(sessionId), false);
                             captureTab = this.main.getCaptureTab(sessionId);
                         } else {
+                            //@TODO
                             throw new IllegalStateException();
                         }
                     } else {
@@ -137,11 +146,12 @@ public class CaptureDevice implements Runnable {
                     }
 
                     CaptureTab finalCaptureTab = captureTab;
+                    GameState finalGameState = gameState;
 
                     //--- Heartbeat
                     if(event.equals("Heartbeat")) {
                         Platform.runLater(() -> {
-                            DataPoint dataPoint = new DataPoint(finalCaptureTab.getCaptureSession().getDataPoints().size());
+                            DataPoint dataPoint = new DataPoint(finalGameState, finalCaptureTab.getCaptureSession().getDataPoints().size());
                             for (DataPoint.Type type : DataPoint.Types.values()) {
                                 dataPoint.add(type, finalObject.get(type.getPacketKey()).getAsNumber());
                             }
@@ -155,7 +165,7 @@ public class CaptureDevice implements Runnable {
                         GPUInformation gpuInformation = new GPUInformation();
                         for(DataPoint.Type type : GPUInformation.Types.values()) {
                             if(finalObject.has(type.getPacketKey())) {
-                                gpuInformation.add(type, finalObject.get(type.getPacketKey()).getAsNumber());
+                                gpuInformation.add(type, finalObject.get(type.getPacketKey()).getAsString());
                             } else {
                                 System.out.println(String.format("boot_gpu_desc is missing '%s'", type.getPacketKey()));
                             }

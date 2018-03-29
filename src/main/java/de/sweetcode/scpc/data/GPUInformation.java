@@ -5,16 +5,20 @@ import java.util.Map;
 
 public class GPUInformation {
 
-    private Map<DataPoint.Type, Number> data = new LinkedHashMap<>();
+    private Map<DataPoint.Type, String> data = new LinkedHashMap<>();
 
     public GPUInformation() {}
 
-    public Number getValue(DataPoint.Type type) {
+    public Map<DataPoint.Type, String> getData() {
+        return this.data;
+    }
+
+    public String getValue(DataPoint.Type type) {
         return this.data.get(type);
     }
 
-    public void add(DataPoint.Type type, Number number) {
-        this.data.put(type, number);
+    public void add(DataPoint.Type type, String value) {
+        this.data.put(type, value);
     }
 
     public enum Types implements DataPoint.Type {
@@ -34,6 +38,7 @@ public class GPUInformation {
             public String getPacketKey() {
                 return "gpuname";
             }
+
         },
         GPU_VENOR_NAME {
             @Override

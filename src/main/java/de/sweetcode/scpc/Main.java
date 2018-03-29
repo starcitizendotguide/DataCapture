@@ -51,7 +51,10 @@ public class Main extends Application {
         CaptureTab tab = new CaptureTab(this, captureSession, containsImportedData);
         this.captureTabs.add(tab);
 
-        Platform.runLater(() -> this.tabPane.getTabs().add(tab));
+        Platform.runLater(() -> {
+            this.tabPane.getTabs().add(tab);
+            this.tabPane.getSelectionModel().select(tab);
+        });
     }
 
     public boolean hasSession(long sessionId) {

@@ -10,6 +10,7 @@ import java.util.Map;
  */
 public class DataPoint {
 
+    private final GameState gameState;
     private final long time;
 
     private final Map<Type, Number> data = new LinkedHashMap<>();
@@ -17,10 +18,14 @@ public class DataPoint {
     /**
      * @param time Timestamp when the point was captured.
      */
-    public DataPoint(long time) {
+    public DataPoint(GameState gameState, long time) {
+        this.gameState = gameState;
         this.time = time;
     }
 
+    public GameState getGameState() {
+        return this.gameState;
+    }
 
     /**
      * Timestamp when the data was captured.

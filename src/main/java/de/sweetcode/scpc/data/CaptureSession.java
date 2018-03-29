@@ -12,7 +12,7 @@ public class CaptureSession {
     private List<DataPoint> dataPoints = new LinkedList<>();
     private GPUInformation gpuInformation;
 
-    private Map<Class, List<Listener>> dataPointListeners = new HashMap<>();
+    private Map<Class, List<Listener>> listeners = new HashMap<>();
 
     /**
      * Creates a CaptureSession with the default id (-1).
@@ -60,8 +60,8 @@ public class CaptureSession {
     public void setGPUInformation(GPUInformation gpuInformation) {
         this.gpuInformation = gpuInformation;
 
-        if(this.dataPointListeners.containsKey(GPUInformation.class)) {
-            this.dataPointListeners.get(GPUInformation.class).forEach(e -> e.captured(gpuInformation));
+        if(this.listeners.containsKey(GPUInformation.class)) {
+            this.listeners.get(GPUInformation.class).forEach(e -> e.captured(gpuInformation));
         }
     }
 
@@ -70,20 +70,23 @@ public class CaptureSession {
      * @param listener
      */
     public <T> void addListener(Class<T> type, Listener<T> listener) {
-        if(!(this.dataPoints.contains(type))) {
-            this.dataPointListeners.put(type, new LinkedList<>());
+        if(!(this.listeners.containsKey(type))) {
+            this.listeners.put(type, new LinkedList<>());
         }
-        this.dataPointListeners.get(type).add(listener);
+        this.listeners.get(type).add(listener);
     }
 
     /**
-     * Adds a new data point and calls all associated dataPointListeners.
+     * Adds a new data point and calls all associated listeners.
      * @param dataPoint The data point.
      */
     public void add(DataPoint dataPoint) {
         this.dataPoints.add(dataPoint);
-        if(this.dataPointListeners.containsKey(DataPoint.class)) {
-            this.dataPointListeners.get(DataPoint.class).forEach(e -> e.captured(dataPoint));
+        if(this.listeners.containsKey(DataPoint.class)) {
+            this.listeners.get(DataPoint.class).forEach(e -> e.captured(dataPoint));
+        }
+        if(this.listeners.containsKey(GameState.class)) {
+            this.listeners.get(GameState.class).forEach(e -> e.captured(dataPoint.getGameState()));
         }
     }
 

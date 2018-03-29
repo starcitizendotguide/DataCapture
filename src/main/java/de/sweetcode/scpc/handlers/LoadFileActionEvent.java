@@ -1,8 +1,7 @@
 package de.sweetcode.scpc.handlers;
 
 import com.google.gson.*;
-import de.sweetcode.scpc.data.CaptureSession;
-import de.sweetcode.scpc.data.DataPoint;
+import de.sweetcode.scpc.data.*;
 import de.sweetcode.scpc.Main;
 import de.sweetcode.scpc.Utils;
 import javafx.event.ActionEvent;
@@ -19,7 +18,8 @@ import java.nio.file.Files;
  */
 public class LoadFileActionEvent implements EventHandler<ActionEvent> {
 
-    private static int counter = 0; //@TODO Serialize session id
+    private final static Gson gson = new Gson();
+
     private final Main main;
 
     public LoadFileActionEvent(Main main) {
@@ -50,11 +50,16 @@ public class LoadFileActionEvent implements EventHandler<ActionEvent> {
             }
 
             try {
-                JsonArray array = new Gson().fromJson(data, JsonArray.class);
+                //--- Root
+                JsonObject root = gson.fromJson(data, JsonObject.class);
 
-                CaptureSession captureSession = new CaptureSession(counter++);
+                CaptureSession captureSession = new CaptureSession(root.get("sessionId").getAsLong());
+                this.main.addCaptureSession(captureSession, true); //NOTE It has to be added here so that the triggers can listen
+
+                //--- Data Points
+                JsonArray dataPointsArray = root.getAsJsonArray("dataPoints");
                 final boolean[] error = {false};
-                array.forEach((element) -> {
+                dataPointsArray.forEach((element) -> {
 
                     if(error[0]) return;
 
@@ -66,7 +71,10 @@ public class LoadFileActionEvent implements EventHandler<ActionEvent> {
                         return;
                     }
 
-                    DataPoint dataPoint = new DataPoint(object.get("index").getAsInt());
+                    int index = object.get("index").getAsInt();
+                    GameState gameState = GameStates.byName(object.get("gameState").getAsString());
+
+                    DataPoint dataPoint = new DataPoint(gameState, index);
                     for (DataPoint.Type type : DataPoint.Types.values()) {
                         if(!(object.has("index"))) {
                             error[0] = true;
@@ -78,7 +86,16 @@ public class LoadFileActionEvent implements EventHandler<ActionEvent> {
                     captureSession.add(dataPoint);
                 });
 
-                this.main.addCaptureSession(captureSession, true);
+                //--- GPU
+                JsonObject gpuObject = root.getAsJsonObject("gpu");
+                GPUInformation gpuInformation = new GPUInformation();
+                for(DataPoint.Type type : GPUInformation.Types.values()) {
+                    if(gpuObject.has(type.getSerializationKey())) {
+                        gpuInformation.add(type, gpuObject.get(type.getSerializationKey()).getAsString());
+                    }
+                }
+                captureSession.setGPUInformation(gpuInformation);
+
 
             } catch (JsonParseException exception) {
                 Utils.popup("File - Load", exception.getMessage(), Alert.AlertType.ERROR, false);
