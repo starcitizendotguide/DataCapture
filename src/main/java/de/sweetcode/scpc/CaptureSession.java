@@ -83,6 +83,11 @@ public class Capture {
         return this.lineChart;
     }
 
+    public void clear() {
+        this.seriesMap.forEach((k,v) -> v.getData().clear());
+        this.dataPoints.clear();
+    }
+
     public void setListener(Listener listener) {
         this.listener = listener;
     }

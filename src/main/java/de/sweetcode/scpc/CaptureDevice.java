@@ -21,12 +21,12 @@ public class SCPC implements Runnable {
     private final static Gson gson = new Gson();
 
     private final Main main;
-    private final Capture capture;
+    private final CaptureSession captureSession;
     private final String addressInput;
 
-    public SCPC(Main main, Capture capture, String addressInput) {
+    public SCPC(Main main, CaptureSession captureSession, String addressInput) {
         this.main = main;
-        this.capture = capture;
+        this.captureSession = captureSession;
         this.addressInput = addressInput;
     }
 
@@ -102,16 +102,15 @@ public class SCPC implements Runnable {
                     final String event = object.get("Event").getAsString();
 
                     if(event.equals("Heartbeat")) {
-                        System.out.println("Capture");
                         final JsonObject finalObject = object;
-                        Platform.runLater(() -> this.capture.add(new DataPoint(
-                                this.capture.size(),
-                                finalObject.get("fps").getAsInt(),
-                                finalObject.get("count_ply").getAsInt(),
-                                finalObject.get("veh_count_total").getAsInt(),
-                                finalObject.get("veh_count_ai").getAsInt(),
-                                finalObject.get("veh_count_player").getAsInt()
-                        )));
+
+                        Platform.runLater(() -> {
+                            DataPoint dataPoint = new DataPoint(this.captureSession.getDataPoints().size());
+                            for (DataPoint.Type type : DataPoint.Types.values()) {
+                                dataPoint.add(type, finalObject.get(type.getPacketKey()).getAsNumber());
+                            }
+                            this.captureSession.add(dataPoint);
+                        });
                     } else if(event.equals("boot_gpu_desc")) {
                         this.main.setStatusText("Star Citizen is booting...", Alert.AlertType.INFORMATION);
                     } else if(event.equals("Game Quit")) {
