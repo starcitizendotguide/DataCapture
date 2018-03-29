@@ -14,6 +14,9 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * The line chart representing all captured values.
+ */
 public class CaptureSessionChart {
 
     private final Map<DataPoint.Type, XYChart.Series<Number, Number>> seriesMap = new LinkedHashMap<>();
@@ -21,6 +24,9 @@ public class CaptureSessionChart {
 
     private final CaptureSession captureSession;
 
+    /**
+     * @param captureSession The session that the chart will display and track.
+     */
     public CaptureSessionChart(CaptureSession captureSession) {
         this.captureSession = captureSession;
         this.captureSession.addListener(dataPoint -> {
@@ -30,10 +36,18 @@ public class CaptureSessionChart {
         });
     }
 
+    /**
+     * Gives the line char.
+     * @return Returns the line chart, never null.
+     */
     public LineChart<Number, Number> getLineChart() {
         return this.lineChart;
     }
 
+    /**
+     * Generates the line chart and does all of the setup.
+     * @return
+     */
     private LineChart<Number, Number> generateLineChart() {
         final LineChart<Number, Number> lineChart;
         final NumberAxis xAxis = new NumberAxis();

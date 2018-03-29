@@ -11,8 +11,11 @@ import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
-import javafx.stage.Stage;
 
+/**
+ * The CaptureTab represents one CaptureSession and displays ALL data and is responsible for dealing
+ * with all interactions related to the specific session it represents.
+ */
 public class CaptureTab extends Tab {
 
     private final CaptureSession captureSession;
@@ -24,6 +27,10 @@ public class CaptureTab extends Tab {
     private Label packagesCapturedLabel = new Label("Packages Captured: -");
     private Label isCapturingLabel = new Label("-");
 
+    /**
+     * @param main The main instance of the program.
+     * @param captureSession The capture session this tab display.
+     */
     public CaptureTab(Main main, CaptureSession captureSession) {
         this.main = main;
         this.captureSession = captureSession;
@@ -31,14 +38,27 @@ public class CaptureTab extends Tab {
         this.setContent();
     }
 
+    /**
+     * The associated main instance.
+     * @return
+     */
     public Main getMain() {
         return this.main;
     }
 
+    /**
+     * The associated capture session.
+     * @return
+     */
     public CaptureSession getCaptureSession() {
         return this.captureSession;
     }
 
+    /**
+     * Sets the value of the status label.
+     * @param statusText The status text.
+     * @param status The status, determines colour and prefix.
+     */
     public void setStatusText(String statusText, Alert.AlertType status) {
 
         Platform.runLater(() -> {
@@ -53,6 +73,9 @@ public class CaptureTab extends Tab {
 
     }
 
+    /**
+     * Setup the content of the tab.
+     */
     private void setContent() {
 
         this.setOnCloseRequest(new TabCloseEvent(this));

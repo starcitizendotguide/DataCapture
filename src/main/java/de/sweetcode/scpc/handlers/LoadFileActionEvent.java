@@ -17,6 +17,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Called when the user wants to load a session from a file.
+ */
 public class LoadFileActionEvent implements EventHandler<ActionEvent> {
 
     private final Main main;

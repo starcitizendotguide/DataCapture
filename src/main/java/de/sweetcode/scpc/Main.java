@@ -42,7 +42,7 @@ public class Main extends Application {
 
     public void removeCaptureTab(long sessionId) {
         if(this.hasSession(sessionId)) {
-            captureTabs.removeIf(captureTab -> captureTab.getCaptureSession().getSessionId() == sessionId);
+            this.captureTabs.removeIf(captureTab -> captureTab.getCaptureSession().getSessionId() == sessionId);
         }
     }
 

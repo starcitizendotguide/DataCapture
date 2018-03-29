@@ -1,6 +1,5 @@
 package de.sweetcode.scpc.handlers;
 
-import de.sweetcode.scpc.Main;
 import de.sweetcode.scpc.gui.CaptureTab;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -9,6 +8,9 @@ import javafx.scene.control.ButtonType;
 
 import java.util.Optional;
 
+/**
+ * Called when the user wants to close a CaptureTab.
+ */
 public class TabCloseEvent implements EventHandler<Event> {
 
     private final CaptureTab captureTab;

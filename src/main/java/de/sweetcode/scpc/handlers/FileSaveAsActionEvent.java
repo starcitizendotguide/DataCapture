@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.sweetcode.scpc.DataPoint;
-import de.sweetcode.scpc.Main;
 import de.sweetcode.scpc.Utils;
 import de.sweetcode.scpc.gui.CaptureTab;
 import javafx.event.ActionEvent;
@@ -18,6 +17,9 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
 
+/**
+ * Called when the user wants to save a session to a file.
+ */
 public class FileSaveAsActionEvent implements EventHandler<ActionEvent> {
 
     private final CaptureTab captureTab;

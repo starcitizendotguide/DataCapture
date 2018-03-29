@@ -5,24 +5,46 @@ import javafx.scene.chart.XYChart;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * A DataPoint holds all captured values for one point in time.
+ */
 public class DataPoint {
 
     private final long time;
 
     private final Map<Type, Number> data = new LinkedHashMap<>();
 
+    /**
+     * @param time Timestamp when the point was captured.
+     */
     public DataPoint(long time) {
         this.time = time;
     }
 
-    public XYChart.Data<Number, Number> getData(Type type) {
-        return new XYChart.Data<>(this.time, this.data.get(type));
-    }
 
+    /**
+     * Timestamp when the data was captured.
+     * @return
+     */
     public long getTime() {
         return this.time;
     }
 
+    /**
+     * Creates a new XYChart.Data instance filled with the correct x and y values.
+     * @param type The data point.
+     * @return Never null, always a XYChart.Data instance.
+     */
+    public XYChart.Data<Number, Number> getData(Type type) {
+        return new XYChart.Data<>(this.time, this.data.get(type));
+    }
+
+
+    /**
+     * Adds or overrides (if the type already exists) in the data point.
+     * @param type The type.
+     * @param number The associated value.
+     */
     public void add(Type type, Number number) {
         this.data.put(type, number);
     }

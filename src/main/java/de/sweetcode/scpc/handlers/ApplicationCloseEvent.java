@@ -10,6 +10,9 @@ import javafx.stage.WindowEvent;
 
 import java.util.Optional;
 
+/**
+ * Called when the application gets closed.
+ */
 public class ApplicationCloseEvent implements EventHandler<WindowEvent> {
 
     private final Main main;

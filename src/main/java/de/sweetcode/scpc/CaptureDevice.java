@@ -16,6 +16,9 @@ import java.net.UnknownHostException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * The CaptureDevice is the object listing to the network traffic and does all of the 'heavy-lifting'.
+ */
 public class CaptureDevice implements Runnable {
 
     private final static Pattern pattern = Pattern.compile("^(.+)(Host: launcher2\\.robertsspaceindustries\\.com).+(User-Agent: libcurl-agent\\/[0-9]\\.[0-9]).+(Accept: application\\/json).+(Content-Type: application\\/json).+(Content-Length: [0-9]+)(.+)$", Pattern.DOTALL);
@@ -24,6 +27,10 @@ public class CaptureDevice implements Runnable {
     private final Main main;
     private final String addressInput;
 
+    /**
+     * @param main The associated main class.
+     * @param addressInput The address the user put into the the popup when the application asked him to.
+     */
     public CaptureDevice(Main main, String addressInput) {
         this.main = main;
         this.addressInput = addressInput;
@@ -80,7 +87,6 @@ public class CaptureDevice implements Runnable {
             }
 
             if (packet == null) {
-                System.out.println("Packet is null.");
                 continue;
             }
 
