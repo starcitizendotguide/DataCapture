@@ -19,7 +19,7 @@ import java.util.*;
 public class CaptureSessionChart {
 
     private final Map<DataPoint.Type, XYChart.Series<Number, Number>> seriesMap = new LinkedHashMap<>();
-    private LineChart<Number, Number> lineChart;
+    private BackgroundLineChart lineChart;
 
     private final CaptureSession captureSession;
 
@@ -40,7 +40,7 @@ public class CaptureSessionChart {
      * Gives the line char.
      * @return Returns the line chart, never null.
      */
-    public LineChart<Number, Number> getLineChart() {
+    public BackgroundLineChart getLineChart() {
         return this.lineChart;
     }
 
@@ -58,9 +58,9 @@ public class CaptureSessionChart {
      * Generates the line chart and does all of the setup.
      * @return
      */
-    private LineChart<Number, Number> generateLineChart() {
+    private BackgroundLineChart generateLineChart() {
 
-        final LineChart<Number, Number> lineChart;
+        final BackgroundLineChart lineChart;
         final NumberAxis xAxis = new NumberAxis();
         xAxis.setLabel("Time");
 
@@ -74,7 +74,7 @@ public class CaptureSessionChart {
             this.seriesMap.put(type, series);
         }
 
-        lineChart = new BackgroundColourLineChart(this.captureSession, xAxis, new NumberAxis(), FXCollections.observableArrayList(seriesList));
+        lineChart = new BackgroundLineChart(this.captureSession, xAxis, new NumberAxis(), FXCollections.observableArrayList(seriesList));
 
         //@Source - https://stackoverflow.com/a/44957354 - Enables Toggle of Data Series by clicking on their icon in the legend
         for (Node n : lineChart.getChildrenUnmodifiable()) {
@@ -96,7 +96,7 @@ public class CaptureSessionChart {
                                             d.getNode().setVisible(s.getNode().isVisible()); // Toggle visibility of every node in the series
                                         }
                                     }
-                                    ((CaptureLineChart)lineChart).redraw();
+                                    lineChart.redraw();
                                 }
                             });
                             break;

@@ -62,6 +62,10 @@ public class CaptureTab extends Tab {
         return this.captureSession;
     }
 
+    public CaptureSessionChart getCaptureSessionChart() {
+        return this.captureSessionChart;
+    }
+
     public boolean containsImportedData() {
         return this.containsImportedData;
     }

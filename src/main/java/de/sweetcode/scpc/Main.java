@@ -1,8 +1,10 @@
 package de.sweetcode.scpc;
 
 import de.sweetcode.scpc.data.CaptureSession;
+import de.sweetcode.scpc.gui.BackgroundLineChart;
 import de.sweetcode.scpc.gui.CaptureTab;
 import de.sweetcode.scpc.handlers.ApplicationCloseEvent;
+import de.sweetcode.scpc.handlers.ChangeBackgroundTypeEvent;
 import de.sweetcode.scpc.handlers.LoadFileActionEvent;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -81,12 +83,24 @@ public class Main extends Application {
         //
         MenuBar menuBar = new MenuBar();
         Menu menu = new Menu("Sessions");
-        menuBar.getMenus().add(menu);
 
         MenuItem importFile = new MenuItem("Import");
         importFile.setOnAction(new LoadFileActionEvent(this));
 
         menu.getItems().add(importFile);
+
+        Menu backgroundMenu = new Menu("Background");
+        MenuItem backgroundNone = new MenuItem("None");
+        MenuItem backgroundColour = new MenuItem("Colour");
+        MenuItem backgroundImage = new MenuItem("Image");
+
+        backgroundNone.setOnAction(new ChangeBackgroundTypeEvent(BackgroundLineChart.BackgroundType.NONE, this.captureTabs));
+        backgroundColour.setOnAction(new ChangeBackgroundTypeEvent(BackgroundLineChart.BackgroundType.COLOUR, this.captureTabs));
+        backgroundImage.setOnAction(new ChangeBackgroundTypeEvent(BackgroundLineChart.BackgroundType.IMAGE, this.captureTabs));
+
+        backgroundMenu.getItems().addAll(backgroundNone, backgroundColour, backgroundImage);
+
+        menuBar.getMenus().addAll(menu, backgroundMenu);
         borderPane.setTop(menuBar);
 
         //---
