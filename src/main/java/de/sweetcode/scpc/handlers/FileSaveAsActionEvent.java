@@ -3,7 +3,7 @@ package de.sweetcode.scpc.handlers;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import de.sweetcode.scpc.DataPoint;
+import de.sweetcode.scpc.data.DataPoint;
 import de.sweetcode.scpc.Utils;
 import de.sweetcode.scpc.gui.CaptureTab;
 import javafx.event.ActionEvent;

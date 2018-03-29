@@ -1,27 +1,25 @@
 package de.sweetcode.scpc.handlers;
 
 import com.google.gson.*;
-import de.sweetcode.scpc.DataPoint;
+import de.sweetcode.scpc.data.CaptureSession;
+import de.sweetcode.scpc.data.DataPoint;
 import de.sweetcode.scpc.Main;
 import de.sweetcode.scpc.Utils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
 import javafx.stage.FileChooser;
 
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * Called when the user wants to load a session from a file.
  */
 public class LoadFileActionEvent implements EventHandler<ActionEvent> {
 
+    private static int counter = 0; //@TODO Serialize session id
     private final Main main;
 
     public LoadFileActionEvent(Main main) {
@@ -31,20 +29,9 @@ public class LoadFileActionEvent implements EventHandler<ActionEvent> {
     @Override
     public void handle(ActionEvent event) {
 
-        /*if(this.main.getCaptureTab().getDataPoints().size() > 0) {
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "You still have other captured data. If you\n" +
-                    " open another file now, you will overwrite the currently captured data.");
-            alert.setTitle("File - Load");
-            Optional<ButtonType> buttonType = alert.showAndWait();
-
-            if(buttonType.isPresent() && buttonType.get().getButtonData().isCancelButton()) {
-                return;
-            }
-        }
-
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JSON Files (*.json)", "*.json"));
-        fileChooser.setTitle("Save Captured Data");
+        fileChooser.setTitle("Import Captured Data");
 
         File file = fileChooser.showOpenDialog(this.main.getStage());
         if(!(file == null)) {
@@ -65,8 +52,7 @@ public class LoadFileActionEvent implements EventHandler<ActionEvent> {
             try {
                 JsonArray array = new Gson().fromJson(data, JsonArray.class);
 
-                List<DataPoint> dataPoints = new LinkedList<>();
-
+                CaptureSession captureSession = new CaptureSession(counter++);
                 final boolean[] error = {false};
                 array.forEach((element) -> {
 
@@ -89,22 +75,17 @@ public class LoadFileActionEvent implements EventHandler<ActionEvent> {
                         }
                         dataPoint.add(type, object.get(type.getSerializationKey()).getAsInt());
                     }
-                    dataPoints.add(dataPoint);
-
+                    captureSession.add(dataPoint);
                 });
 
-                this.main.getCaptureTab().clear();
-                dataPoints.forEach(this.main.getCaptureTab()::add);
+                this.main.addCaptureSession(captureSession, true);
 
             } catch (JsonParseException exception) {
                 Utils.popup("File - Load", exception.getMessage(), Alert.AlertType.ERROR, false);
                 return;
             }
 
-            this.main.getCaptureTab().clear();
-
-
-        }*/
+        }
 
     }
 

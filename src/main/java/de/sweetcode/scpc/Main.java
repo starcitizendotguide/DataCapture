@@ -1,13 +1,13 @@
 package de.sweetcode.scpc;
 
+import de.sweetcode.scpc.data.CaptureSession;
 import de.sweetcode.scpc.gui.CaptureTab;
 import de.sweetcode.scpc.handlers.ApplicationCloseEvent;
+import de.sweetcode.scpc.handlers.LoadFileActionEvent;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ChoiceDialog;
-import javafx.scene.control.TabPane;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
@@ -47,8 +47,8 @@ public class Main extends Application {
         }
     }
 
-    public void addCaptureSession(CaptureSession captureSession) {
-        CaptureTab tab = new CaptureTab(this, captureSession);
+    public void addCaptureSession(CaptureSession captureSession, boolean containsImportedData) {
+        CaptureTab tab = new CaptureTab(this, captureSession, containsImportedData);
         this.captureTabs.add(tab);
 
         Platform.runLater(() -> this.tabPane.getTabs().add(tab));
@@ -69,11 +69,22 @@ public class Main extends Application {
         stage.setOnCloseRequest(new ApplicationCloseEvent(this));
 
         //--- Default Tab
-        this.addCaptureSession(new CaptureSession());
+        this.addCaptureSession(new CaptureSession(), false);
 
         //---
         BorderPane borderPane = new BorderPane();
         borderPane.setCenter(this.tabPane);
+
+        //
+        MenuBar menuBar = new MenuBar();
+        Menu menu = new Menu("Sessions");
+        menuBar.getMenus().add(menu);
+
+        MenuItem importFile = new MenuItem("Import");
+        importFile.setOnAction(new LoadFileActionEvent(this));
+
+        menu.getItems().add(importFile);
+        borderPane.setTop(menuBar);
 
         //---
         stage.setScene(new Scene(borderPane, 1280, 720));
@@ -99,16 +110,21 @@ public class Main extends Application {
 
                 //--- Address
                 List<InetAddress> inetAddresses = Collections.list(optional.get().getInetAddresses());
-                ChoiceDialog<InetAddress> inetAddressChoiceDialog = new ChoiceDialog<>(inetAddresses.get(0), inetAddresses);
-                inetAddressChoiceDialog.setTitle("Network - Address");
-                inetAddressChoiceDialog.setHeaderText("Please select an network address.");
-                Optional<InetAddress> inetAddressOptional = inetAddressChoiceDialog.showAndWait();
 
-                if(inetAddressOptional.isPresent()) {
-                    address = inetAddressOptional.get().getHostAddress();
+                if(inetAddresses.size() == 1) {
+                    address = inetAddresses.get(0).getHostAddress();
                 } else {
-                    Utils.popup("IP Address", "You didn't select a IP address.", Alert.AlertType.ERROR, true);
-                    return;
+                    ChoiceDialog<InetAddress> inetAddressChoiceDialog = new ChoiceDialog<>(inetAddresses.get(0), inetAddresses);
+                    inetAddressChoiceDialog.setTitle("Network - Address");
+                    inetAddressChoiceDialog.setHeaderText("Please select an network address.");
+                    Optional<InetAddress> inetAddressOptional = inetAddressChoiceDialog.showAndWait();
+
+                    if (inetAddressOptional.isPresent()) {
+                        address = inetAddressOptional.get().getHostAddress();
+                    } else {
+                        Utils.popup("IP Address", "You didn't select a IP address.", Alert.AlertType.ERROR, true);
+                        return;
+                    }
                 }
 
             } else {

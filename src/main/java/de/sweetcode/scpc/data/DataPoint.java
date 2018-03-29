@@ -1,4 +1,4 @@
-package de.sweetcode.scpc;
+package de.sweetcode.scpc.data;
 
 import javafx.scene.chart.XYChart;
 

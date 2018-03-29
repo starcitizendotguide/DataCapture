@@ -1,8 +1,6 @@
-package de.sweetcode.scpc;
+package de.sweetcode.scpc.data;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * The CaptureSession represents one session worth of data.
@@ -12,7 +10,9 @@ public class CaptureSession {
     private long sessionId;
 
     private List<DataPoint> dataPoints = new LinkedList<>();
-    private List<CaptureSession.Listener> listeners = new ArrayList<>();
+    private GPUInformation gpuInformation;
+
+    private Map<Class, List<Listener>> dataPointListeners = new HashMap<>();
 
     /**
      * Creates a CaptureSession with the default id (-1).
@@ -45,6 +45,10 @@ public class CaptureSession {
         return this.dataPoints;
     }
 
+    public GPUInformation getGPUInformation() {
+        return this.gpuInformation;
+    }
+
     /**
      * Sets the session id of the session.
      * @param sessionId The session id.
@@ -53,29 +57,38 @@ public class CaptureSession {
         this.sessionId = sessionId;
     }
 
+    public void setGPUInformation(GPUInformation gpuInformation) {
+        this.gpuInformation = gpuInformation;
+
+        if(this.dataPointListeners.containsKey(GPUInformation.class)) {
+            this.dataPointListeners.get(GPUInformation.class).forEach(e -> e.captured(gpuInformation));
+        }
+    }
+
     /**
      * Adds a listener, called when a new DataPoint gets added to the session.
      * @param listener
      */
-    public void addListener(Listener listener) {
-        this.listeners.add(listener);
+    public <T> void addListener(Class<T> type, Listener<T> listener) {
+        if(!(this.dataPoints.contains(type))) {
+            this.dataPointListeners.put(type, new LinkedList<>());
+        }
+        this.dataPointListeners.get(type).add(listener);
     }
 
     /**
-     * Adds a new data point and calls all associated listeners.
+     * Adds a new data point and calls all associated dataPointListeners.
      * @param dataPoint The data point.
      */
     public void add(DataPoint dataPoint) {
         this.dataPoints.add(dataPoint);
-        this.listeners.forEach(e -> e.captured(dataPoint));
+        if(this.dataPointListeners.containsKey(DataPoint.class)) {
+            this.dataPointListeners.get(DataPoint.class).forEach(e -> e.captured(dataPoint));
+        }
     }
 
-    public interface Listener {
-        /**
-         * Called when a new data point got added.
-         * @param dataPoint The new data point.
-         */
-        void captured(DataPoint dataPoint);
+    public interface Listener<T> {
+        void captured(T data );
     }
 
 }

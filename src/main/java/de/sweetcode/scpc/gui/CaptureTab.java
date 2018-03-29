@@ -1,8 +1,9 @@
 package de.sweetcode.scpc.gui;
 
-import de.sweetcode.scpc.CaptureSession;
-import de.sweetcode.scpc.DataPoint;
 import de.sweetcode.scpc.Main;
+import de.sweetcode.scpc.data.CaptureSession;
+import de.sweetcode.scpc.data.DataPoint;
+import de.sweetcode.scpc.data.GPUInformation;
 import de.sweetcode.scpc.handlers.FileSaveAsActionEvent;
 import de.sweetcode.scpc.handlers.TabCloseEvent;
 import javafx.application.Platform;
@@ -19,10 +20,14 @@ import javafx.scene.paint.Color;
 public class CaptureTab extends Tab {
 
     private final CaptureSession captureSession;
+
     private final CaptureSessionChart captureSessionChart;
+
+    private boolean containsImportedData = false;
 
     //---
     private final Main main;
+    private Label gpuLabel = new Label("GPU: -");
     private Label fpsLabel = new Label("FPS: -");
     private Label packagesCapturedLabel = new Label("Packages Captured: -");
     private Label isCapturingLabel = new Label("-");
@@ -31,10 +36,11 @@ public class CaptureTab extends Tab {
      * @param main The main instance of the program.
      * @param captureSession The capture session this tab display.
      */
-    public CaptureTab(Main main, CaptureSession captureSession) {
+    public CaptureTab(Main main, CaptureSession captureSession, boolean containsImportedData) {
         this.main = main;
         this.captureSession = captureSession;
         this.captureSessionChart = new CaptureSessionChart(this.captureSession);
+        this.containsImportedData = containsImportedData;
         this.setContent();
     }
 
@@ -52,6 +58,10 @@ public class CaptureTab extends Tab {
      */
     public CaptureSession getCaptureSession() {
         return this.captureSession;
+    }
+
+    public boolean containsImportedData() {
+        return this.containsImportedData;
     }
 
     /**
@@ -105,16 +115,24 @@ public class CaptureTab extends Tab {
         infoLabels.setSpacing(20);
 
         infoLabels.getChildren().add(this.fpsLabel);
+        infoLabels.getChildren().add(this.gpuLabel);
         infoLabels.getChildren().add(this.packagesCapturedLabel);
         infoLabels.getChildren().add(this.isCapturingLabel);
         pane.setBottom(infoLabels);
 
-        this.captureSession.addListener(dataPoint -> {
-            this.fpsLabel.setText(String.format("FPS: %d", dataPoint.getData(DataPoint.Types.FPS).getYValue().intValue()));
-            packagesCapturedLabel.setText(String.format("Packages Captured: %d", this.captureSession.getDataPoints().size()));
-            this.setStatusText("Capturing...", Alert.AlertType.INFORMATION);
+        this.captureSession.addListener(DataPoint.class, dataPoint -> {
+            Platform.runLater(() -> {
+                this.fpsLabel.setText(String.format("FPS: %d", dataPoint.getData(DataPoint.Types.FPS).getYValue().intValue()));
+                packagesCapturedLabel.setText(String.format("Packages Captured: %d", this.captureSession.getDataPoints().size()));
+                this.setStatusText("Capturing...", Alert.AlertType.INFORMATION);
+            });
         });
 
+        this.captureSession.addListener(GPUInformation.class, gpuInformation -> {
+            Platform.runLater(() -> {
+                this.gpuLabel.setText("GPU: " + gpuInformation.getValue(GPUInformation.Types.GPU_NAME));
+            });
+        });
 
         //---
         pane.setCenter(this.captureSessionChart.getLineChart());
@@ -123,8 +141,11 @@ public class CaptureTab extends Tab {
         //---
         this.setStatusText("Waiting for Star Citizen", Alert.AlertType.INFORMATION);
 
+        if(this.containsImportedData) {
+            this.captureSessionChart.forceDraw();
+        }
+
 
     }
-
 
 }

@@ -1,8 +1,8 @@
 package de.sweetcode.scpc.gui;
 
 import com.sun.javafx.charts.Legend;
-import de.sweetcode.scpc.CaptureSession;
-import de.sweetcode.scpc.DataPoint;
+import de.sweetcode.scpc.data.CaptureSession;
+import de.sweetcode.scpc.data.DataPoint;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
@@ -29,7 +29,7 @@ public class CaptureSessionChart {
      */
     public CaptureSessionChart(CaptureSession captureSession) {
         this.captureSession = captureSession;
-        this.captureSession.addListener(dataPoint -> {
+        this.captureSession.addListener(DataPoint.class, dataPoint -> {
             for (DataPoint.Type type : DataPoint.Types.values()) {
                 this.seriesMap.get(type).getData().add(dataPoint.getData(type));
             }
@@ -42,6 +42,17 @@ public class CaptureSessionChart {
      */
     public LineChart<Number, Number> getLineChart() {
         return this.lineChart;
+    }
+
+    public void forceDraw() {
+        this.lineChart.getData().clear();
+        this.seriesMap.clear();
+
+        this.captureSession.getDataPoints().forEach(dataPoint -> {
+            for (DataPoint.Type type : DataPoint.Types.values()) {
+                this.seriesMap.get(type).getData().add(dataPoint.getData(type));
+            }
+        });
     }
 
     /**
@@ -58,7 +69,7 @@ public class CaptureSessionChart {
             XYChart.Series<Number, Number> series = new XYChart.Series<>();
             series.setName(type.getName());
             lineChart.getData().add(series);
-            seriesMap.put(type, series);
+            this.seriesMap.put(type, series);
         }
 
 

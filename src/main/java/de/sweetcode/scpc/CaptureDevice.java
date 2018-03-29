@@ -3,6 +3,9 @@ package de.sweetcode.scpc;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
+import de.sweetcode.scpc.data.CaptureSession;
+import de.sweetcode.scpc.data.DataPoint;
+import de.sweetcode.scpc.data.GPUInformation;
 import de.sweetcode.scpc.gui.CaptureTab;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
@@ -108,35 +111,35 @@ public class CaptureDevice implements Runnable {
 
                     final String event = object.get("Event").getAsString();
 
-                    if(event.equals("Heartbeat")) {
-                        final JsonObject finalObject = object;
+                    final JsonObject finalObject = object;
+                    CaptureTab captureTab = null;
 
-                        CaptureTab captureTab = null;
+                    if(finalObject.has("sessionid")) {
+                        long sessionId = finalObject.get("sessionid").getAsLong();
 
-                        if(finalObject.has("sessionid")) {
-                            long sessionId = finalObject.get("sessionid").getAsLong();
-
-                            //--- Default Session
-                            if(this.main.hasSession(-1)) {
-                                captureTab = this.main.getCaptureTab(-1);
-                                captureTab.getCaptureSession().setSessionId(sessionId);
-                                CaptureTab finalCaptureTab1 = captureTab;
-                                Platform.runLater(() -> finalCaptureTab1.setText(String.format("Session - %d", sessionId)));
-                                ;
-                            } else if(this.main.hasSession(sessionId)) {
-                                captureTab = this.main.getCaptureTab(sessionId);
-                            } else if(!(this.main.hasSession(sessionId))) {
-                                this.main.addCaptureSession(new CaptureSession(sessionId));
-                                captureTab = this.main.getCaptureTab(sessionId);
-                            } else {
-                                throw new IllegalStateException();
-                            }
+                        //--- Default Session
+                        if(this.main.hasSession(-1)) {
+                            captureTab = this.main.getCaptureTab(-1);
+                            captureTab.getCaptureSession().setSessionId(sessionId);
+                            CaptureTab finalCaptureTab1 = captureTab;
+                            Platform.runLater(() -> finalCaptureTab1.setText(String.format("Session - %d", sessionId)));
+                        } else if(this.main.hasSession(sessionId)) {
+                            captureTab = this.main.getCaptureTab(sessionId);
+                        } else if(!(this.main.hasSession(sessionId))) {
+                            this.main.addCaptureSession(new CaptureSession(sessionId), false);
+                            captureTab = this.main.getCaptureTab(sessionId);
                         } else {
-                            System.out.println("Waiting for packet with session id...");
-                            continue;
+                            throw new IllegalStateException();
                         }
+                    } else {
+                        System.out.println("Waiting for packet with session id...");
+                        continue;
+                    }
 
-                        CaptureTab finalCaptureTab = captureTab;
+                    CaptureTab finalCaptureTab = captureTab;
+
+                    //--- Heartbeat
+                    if(event.equals("Heartbeat")) {
                         Platform.runLater(() -> {
                             DataPoint dataPoint = new DataPoint(finalCaptureTab.getCaptureSession().getDataPoints().size());
                             for (DataPoint.Type type : DataPoint.Types.values()) {
@@ -144,10 +147,24 @@ public class CaptureDevice implements Runnable {
                             }
                             finalCaptureTab.getCaptureSession().add(dataPoint);
                         });
-                    } else if(event.equals("boot_gpu_desc")) {
-                        //captureTab.setStatusText("Star Citizen is booting...", Alert.AlertType.INFORMATION);
+                    }
+                    //--- BOOT: GPU DESCRIPTION
+                    else if(event.equals("boot_gpu_desc")) {
+                        captureTab.setStatusText("Star Citizen is booting...", Alert.AlertType.INFORMATION);
+
+                        GPUInformation gpuInformation = new GPUInformation();
+                        for(DataPoint.Type type : GPUInformation.Types.values()) {
+                            if(finalObject.has(type.getPacketKey())) {
+                                gpuInformation.add(type, finalObject.get(type.getPacketKey()).getAsNumber());
+                            } else {
+                                System.out.println(String.format("boot_gpu_desc is missing '%s'", type.getPacketKey()));
+                            }
+                        }
+                        captureTab.getCaptureSession().setGPUInformation(gpuInformation);
+
                     } else if(event.equals("Game Quit")) {
-                        //captureTab.setStatusText("Star Citizen closed", Alert.AlertType.INFORMATION);
+                        System.out.println("Game Quit -> " + payload);
+                        captureTab.setStatusText("Star Citizen closed", Alert.AlertType.INFORMATION);
                     } else {
                         System.out.println("Event: " + event);
                     }
