@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import de.sweetcode.scpc.DataPoint;
 import de.sweetcode.scpc.Main;
 import de.sweetcode.scpc.Utils;
+import de.sweetcode.scpc.gui.CaptureTab;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
@@ -19,16 +20,16 @@ import java.util.List;
 
 public class FileSaveAsActionEvent implements EventHandler<ActionEvent> {
 
-    private final Main main;
+    private final CaptureTab captureTab;
 
-    public FileSaveAsActionEvent(Main main) {
-        this.main = main;
+    public FileSaveAsActionEvent(CaptureTab captureTab) {
+        this.captureTab = captureTab;
     }
 
     @Override
     public void handle(ActionEvent event) {
 
-        if(this.main.getCapture().size() == 0) {
+        if(this.captureTab.getCaptureSession().getDataPoints().size() == 0) {
             Utils.popup("File - Save As", "No packets captured yet.", Alert.AlertType.INFORMATION, false);
             return;
         }
@@ -37,7 +38,7 @@ public class FileSaveAsActionEvent implements EventHandler<ActionEvent> {
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JSON Files (*.json)", "*.json"));
         fileChooser.setTitle("Save Captured Data");
 
-        File file = fileChooser.showSaveDialog(this.main.getStage());
+        File file = fileChooser.showSaveDialog(this.captureTab.getMain().getStage());
         if(!(file == null)) {
 
             if(!(file.getName().toLowerCase().endsWith(".json"))) {
@@ -45,7 +46,7 @@ public class FileSaveAsActionEvent implements EventHandler<ActionEvent> {
                 return;
             }
 
-            List<DataPoint> dataPoints = this.main.getCapture().getDataPoints();
+            List<DataPoint> dataPoints = this.captureTab.getCaptureSession().getDataPoints();
             JsonArray array = new JsonArray();
 
             for(DataPoint entry : dataPoints) {

@@ -1,29 +1,28 @@
 package de.sweetcode.scpc.handlers;
 
-
 import de.sweetcode.scpc.Main;
-import javafx.application.Platform;
+import de.sweetcode.scpc.gui.CaptureTab;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
-import javafx.stage.WindowEvent;
 
 import java.util.Optional;
 
-public class ApplicationCloseEvent implements EventHandler<WindowEvent> {
+public class TabCloseEvent implements EventHandler<Event> {
 
-    private final Main main;
+    private final CaptureTab captureTab;
 
-    public ApplicationCloseEvent(Main main) {
-        this.main = main;
+    public TabCloseEvent(CaptureTab captureTab) {
+        this.captureTab = captureTab;
     }
 
     @Override
-    public void handle(WindowEvent event) {
+    public void handle(Event event) {
 
-        if(this.main.getCaptureTabs().stream().anyMatch(e -> e.getCaptureSession().getDataPoints().size() > 0)) {
+        if(this.captureTab.getCaptureSession().getDataPoints().size() > 0) {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "All unsaved data will be lost.\n" +
-                    "Do you really wanna close the application now?");
+                    "Do you really wanna close this tab now?");
             alert.setTitle("Exit");
             Optional<ButtonType> response = alert.showAndWait();
 
@@ -33,9 +32,7 @@ public class ApplicationCloseEvent implements EventHandler<WindowEvent> {
             }
         }
 
-        Platform.exit();
-        System.exit(0);
+        this.captureTab.getMain().removeCaptureTab(this.captureTab.getCaptureSession().getSessionId());
 
     }
-
 }

@@ -11,14 +11,8 @@ public class DataPoint {
 
     private final Map<Type, Number> data = new LinkedHashMap<>();
 
-    public DataPoint(long time, int fps, int players, int vehicles_total, int vehicles_ai, int vehicles_player) {
+    public DataPoint(long time) {
         this.time = time;
-
-        this.data.put(Types.FPS, fps);
-        this.data.put(Types.PLAYERS, players);
-        this.data.put(Types.VEHICLES_TOTAL, vehicles_total);
-        this.data.put(Types.VEHICLES_PLAYER, vehicles_player);
-        this.data.put(Types.VEHICLES_AI, vehicles_ai);
     }
 
     public XYChart.Data<Number, Number> getData(Type type) {
@@ -27,6 +21,10 @@ public class DataPoint {
 
     public long getTime() {
         return this.time;
+    }
+
+    public void add(Type type, Number number) {
+        this.data.put(type, number);
     }
 
     public enum Types implements Type {
@@ -41,6 +39,11 @@ public class DataPoint {
             public String getSerializationKey() {
                 return "game_fps";
             }
+
+            @Override
+            public String getPacketKey() {
+                return "fps";
+            }
         },
         PLAYERS {
             @Override
@@ -51,6 +54,11 @@ public class DataPoint {
             @Override
             public String getSerializationKey() {
                 return "player_count";
+            }
+
+            @Override
+            public String getPacketKey() {
+                return "count_ply";
             }
         },
         VEHICLES_TOTAL {
@@ -63,6 +71,11 @@ public class DataPoint {
             public String getSerializationKey() {
                 return "vehicles_total";
             }
+
+            @Override
+            public String getPacketKey() {
+                return "veh_count_total";
+            }
         },
         VEHICLES_AI {
             @Override
@@ -73,6 +86,11 @@ public class DataPoint {
             @Override
             public String getSerializationKey() {
                 return "vehicles_ai";
+            }
+
+            @Override
+            public String getPacketKey() {
+                return "veh_count_ai";
             }
         },
         VEHICLES_PLAYER {
@@ -85,6 +103,11 @@ public class DataPoint {
             public String getSerializationKey() {
                 return "vehicles_player";
             }
+
+            @Override
+            public String getPacketKey() {
+                return "veh_count_player";
+            }
         };
 
     }
@@ -94,6 +117,8 @@ public class DataPoint {
         String getName();
 
         String getSerializationKey();
+
+        String getPacketKey();
 
     }
 

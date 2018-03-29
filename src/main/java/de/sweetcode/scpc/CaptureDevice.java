@@ -3,6 +3,7 @@ package de.sweetcode.scpc;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
+import de.sweetcode.scpc.gui.CaptureTab;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import org.pcap4j.core.*;
@@ -15,23 +16,22 @@ import java.net.UnknownHostException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class SCPC implements Runnable {
+public class CaptureDevice implements Runnable {
 
     private final static Pattern pattern = Pattern.compile("^(.+)(Host: launcher2\\.robertsspaceindustries\\.com).+(User-Agent: libcurl-agent\\/[0-9]\\.[0-9]).+(Accept: application\\/json).+(Content-Type: application\\/json).+(Content-Length: [0-9]+)(.+)$", Pattern.DOTALL);
     private final static Gson gson = new Gson();
 
     private final Main main;
-    private final CaptureSession captureSession;
     private final String addressInput;
 
-    public SCPC(Main main, CaptureSession captureSession, String addressInput) {
+    public CaptureDevice(Main main, String addressInput) {
         this.main = main;
-        this.captureSession = captureSession;
         this.addressInput = addressInput;
     }
 
     @Override
     public void run() {
+
         //---
         InetAddress address = null;
         try {
@@ -46,7 +46,7 @@ public class SCPC implements Runnable {
             networkInterface = Pcaps.getDevByAddress(address);
         } catch (PcapNativeException e) {
             e.printStackTrace();
-            this.main.setStatusText("An popup occured in the pcap native library. [Pcaps#getDevByAddress]", Alert.AlertType.ERROR);
+            Utils.popup("Exception", "An popup occured in the pcap native library. [Pcaps#getDevByAddress]", Alert.AlertType.ERROR, true);
         }
 
         if(networkInterface == null) {
@@ -62,7 +62,7 @@ public class SCPC implements Runnable {
         try {
             handle = networkInterface.openLive(SNAP_LEN, mode, TIMEOUT);
         } catch (PcapNativeException e) {
-            this.main.setStatusText("An popup occured in the pcap native library. [PcapNetworkInterface#openLive]", Alert.AlertType.ERROR);
+            Utils.popup("Exception", "An popup occured in the pcap native library. [PcapNetworkInterface#openLive]", Alert.AlertType.ERROR, true);
             return;
         }
 
@@ -72,7 +72,8 @@ public class SCPC implements Runnable {
             try {
                 packet = handle.getNextPacket();
             } catch (NotOpenException e) {
-                this.main.setStatusText("The handle is not open.", Alert.AlertType.ERROR);
+                Utils.popup("Exception", "The handle is not open.", Alert.AlertType.ERROR, false);
+                return;
             } catch (IllegalArgumentException ignore) {
                 ignore.printStackTrace();
                 //--- No Clue @TODO
@@ -104,19 +105,43 @@ public class SCPC implements Runnable {
                     if(event.equals("Heartbeat")) {
                         final JsonObject finalObject = object;
 
+                        CaptureTab captureTab = null;
+
+                        if(finalObject.has("sessionid")) {
+                            long sessionId = finalObject.get("sessionid").getAsLong();
+
+                            //--- Default Session
+                            if(this.main.hasSession(-1)) {
+                                captureTab = this.main.getCaptureTab(-1);
+                                captureTab.getCaptureSession().setSessionId(sessionId);
+                                CaptureTab finalCaptureTab1 = captureTab;
+                                Platform.runLater(() -> finalCaptureTab1.setText(String.format("Session - %d", sessionId)));
+                                ;
+                            } else if(this.main.hasSession(sessionId)) {
+                                captureTab = this.main.getCaptureTab(sessionId);
+                            } else if(!(this.main.hasSession(sessionId))) {
+                                this.main.addCaptureSession(new CaptureSession(sessionId));
+                                captureTab = this.main.getCaptureTab(sessionId);
+                            } else {
+                                throw new IllegalStateException();
+                            }
+                        } else {
+                            System.out.println("Waiting for packet with session id...");
+                            continue;
+                        }
+
+                        CaptureTab finalCaptureTab = captureTab;
                         Platform.runLater(() -> {
-                            DataPoint dataPoint = new DataPoint(this.captureSession.getDataPoints().size());
+                            DataPoint dataPoint = new DataPoint(finalCaptureTab.getCaptureSession().getDataPoints().size());
                             for (DataPoint.Type type : DataPoint.Types.values()) {
                                 dataPoint.add(type, finalObject.get(type.getPacketKey()).getAsNumber());
                             }
-                            this.captureSession.add(dataPoint);
+                            finalCaptureTab.getCaptureSession().add(dataPoint);
                         });
                     } else if(event.equals("boot_gpu_desc")) {
-                        this.main.setStatusText("Star Citizen is booting...", Alert.AlertType.INFORMATION);
+                        //captureTab.setStatusText("Star Citizen is booting...", Alert.AlertType.INFORMATION);
                     } else if(event.equals("Game Quit")) {
-                        this.main.setStatusText("Star Citizen closed", Alert.AlertType.INFORMATION);
-                        handle.close();
-                        this.main.start(this.addressInput);
+                        //captureTab.setStatusText("Star Citizen closed", Alert.AlertType.INFORMATION);
                     } else {
                         System.out.println("Event: " + event);
                     }
