@@ -37,6 +37,7 @@ public class FileSaveAsActionEvent implements EventHandler<ActionEvent> {
         }
 
         FileChooser fileChooser = new FileChooser();
+        fileChooser.setInitialFileName(String.format("session-%d.json", this.captureTab.getCaptureSession().getSessionId()));
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JSON Files (*.json)", "*.json"));
         fileChooser.setTitle("Save Captured Data");
 

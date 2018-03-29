@@ -6,13 +6,14 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.TabPane;
-import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -81,31 +82,42 @@ public class Main extends Application {
         //--- Get IP
         String address = null;
         try {
-            TextInputDialog dialog = new TextInputDialog(InetAddress.getLocalHost().getHostAddress());
-            dialog.setTitle("Your Local IP");
-            dialog.setHeaderText("Please set your local IP address. This will allow us to identify the correct interface\n" +
-                    "in case you own multiple (e.g. running VMs). The set value might already be correct.\n\n" +
-                    "If it is wrong the program won't be able to captureSession any data.");
-            Optional<String> result = dialog.showAndWait();
 
-            if(!(result.isPresent())) {
-                Utils.popup("Error", "You have to enter an IP address.", Alert.AlertType.ERROR, true);
-            } else {
-                address = result.get().trim().isEmpty() ? InetAddress.getLocalHost().getHostAddress() : result.get();
+            //--- Interface
+            Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+            List<NetworkInterface> unique = new ArrayList<>();
+            for(NetworkInterface entry : Collections.list(networkInterfaces)) {
+               if(entry.getInetAddresses().hasMoreElements()) unique.add(entry);
             }
-        } catch (UnknownHostException e) {
-            TextInputDialog dialog = new TextInputDialog("");
-            dialog.setTitle("Your Local IP");
-            dialog.setHeaderText("Please set your local IP address. This will allow us to identify the correct interface " +
-                    "in case you own multiple (e.g. running VMs.\n\n" +
-                    "If it is wrong the program won't be able to captureSession any data.");
-            Optional<String> result = dialog.showAndWait();
 
-            if(!(result.isPresent())) {
-                Utils.popup("Error", "You have to enter an IP address.", Alert.AlertType.ERROR, true);
+            ChoiceDialog<NetworkInterface> choiceDialog = new ChoiceDialog<>(unique.get(0), unique);
+            choiceDialog.setTitle("Network - Interface");
+            choiceDialog.setHeaderText("Please select an network interface.");
+            Optional<NetworkInterface> optional = choiceDialog.showAndWait();
+
+            if(optional.isPresent()) {
+
+                //--- Address
+                List<InetAddress> inetAddresses = Collections.list(optional.get().getInetAddresses());
+                ChoiceDialog<InetAddress> inetAddressChoiceDialog = new ChoiceDialog<>(inetAddresses.get(0), inetAddresses);
+                inetAddressChoiceDialog.setTitle("Network - Address");
+                inetAddressChoiceDialog.setHeaderText("Please select an network address.");
+                Optional<InetAddress> inetAddressOptional = inetAddressChoiceDialog.showAndWait();
+
+                if(inetAddressOptional.isPresent()) {
+                    address = inetAddressOptional.get().getHostAddress();
+                } else {
+                    Utils.popup("IP Address", "You didn't select a IP address.", Alert.AlertType.ERROR, true);
+                    return;
+                }
+
             } else {
-                address = result.get();
+                Utils.popup("IP Address", "You didn't select a network interface.", Alert.AlertType.ERROR, true);
+                return;
             }
+
+        } catch (SocketException e) {
+            e.printStackTrace();
         }
 
         this.threadPool.execute(new CaptureDevice(this, address));
