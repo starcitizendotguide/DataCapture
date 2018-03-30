@@ -49,6 +49,8 @@ public class BackgroundLineChart extends LineChart<Number, Number> {
         Series series = this.getData().get(0);
         ObservableList<Data<Number,Number>> data = series.getData();
 
+        double startX = 0;
+
         for(int i = 0; i < this.getData().get(0).getData().size(); i++) {
 
             //
@@ -75,6 +77,7 @@ public class BackgroundLineChart extends LineChart<Number, Number> {
                 polygon.getPoints().addAll(
                         currX,ground, currX,currY
                 );
+                startX = currX;
                 inMiddle = true;
             }
             //--- Middle
@@ -104,20 +107,14 @@ public class BackgroundLineChart extends LineChart<Number, Number> {
                         );
 
                     }
-                    bottom.add(preX);
-                    bottom.add(ground);
-                    bottom.add(currX);
-                    bottom.add(ground);
-                    bottom.add(currX);
-                    bottom.add(ground);
-                    bottom.add(postX);
-                    bottom.add(ground);
+
                 } else {
 
                     polygon.getPoints().addAll(
                             preX,preY, currX, currY,
                             currX,currY, currX,ground,
-                            currX,ground,preX,ground
+                            currX,ground,preX,ground,
+                            preX,ground, startX,ground
                     );
 
                     polygon.getPoints().addAll(bottom);
@@ -133,7 +130,7 @@ public class BackgroundLineChart extends LineChart<Number, Number> {
 
 
                     polygon = new Polygon();
-                    bottom = new LinkedList<>();
+                    bottom.clear();
                 }
             }
 
