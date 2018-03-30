@@ -29,6 +29,8 @@ public class Main extends Application {
 
     private final List<CaptureTab> captureTabs = new ArrayList<>();
 
+    private BackgroundLineChart.BackgroundType defaultBackgroundType = BackgroundLineChart.BackgroundType.NONE;
+
     public Main() {}
 
     public Stage getStage() {
@@ -43,6 +45,10 @@ public class Main extends Application {
         return this.captureTabs;
     }
 
+    public void setDefaultBackgroundType(BackgroundLineChart.BackgroundType defaultBackGroundType) {
+        this.defaultBackgroundType = defaultBackGroundType;
+    }
+
     public void removeCaptureTab(long sessionId) {
         if(this.hasSession(sessionId)) {
             this.captureTabs.removeIf(captureTab -> captureTab.getCaptureSession().getSessionId() == sessionId);
@@ -52,6 +58,7 @@ public class Main extends Application {
     public void addCaptureSession(CaptureSession captureSession, boolean containsImportedData) {
         CaptureTab tab = new CaptureTab(this, captureSession, containsImportedData);
         this.captureTabs.add(tab);
+        tab.getCaptureSessionChart().getLineChart().setBackgroundType(this.defaultBackgroundType);
 
         Platform.runLater(() -> {
             this.tabPane.getTabs().add(tab);
@@ -94,9 +101,9 @@ public class Main extends Application {
         MenuItem backgroundColour = new MenuItem("Colour");
         MenuItem backgroundImage = new MenuItem("Image");
 
-        backgroundNone.setOnAction(new ChangeBackgroundTypeEvent(BackgroundLineChart.BackgroundType.NONE, this.captureTabs));
-        backgroundColour.setOnAction(new ChangeBackgroundTypeEvent(BackgroundLineChart.BackgroundType.COLOUR, this.captureTabs));
-        backgroundImage.setOnAction(new ChangeBackgroundTypeEvent(BackgroundLineChart.BackgroundType.IMAGE, this.captureTabs));
+        backgroundNone.setOnAction(new ChangeBackgroundTypeEvent(BackgroundLineChart.BackgroundType.NONE, this));
+        backgroundColour.setOnAction(new ChangeBackgroundTypeEvent(BackgroundLineChart.BackgroundType.COLOUR, this));
+        backgroundImage.setOnAction(new ChangeBackgroundTypeEvent(BackgroundLineChart.BackgroundType.IMAGE, this));
 
         backgroundMenu.getItems().addAll(backgroundNone, backgroundColour, backgroundImage);
 

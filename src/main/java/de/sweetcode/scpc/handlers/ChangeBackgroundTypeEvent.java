@@ -1,25 +1,27 @@
 package de.sweetcode.scpc.handlers;
 
+import de.sweetcode.scpc.Main;
 import de.sweetcode.scpc.gui.BackgroundLineChart;
-import de.sweetcode.scpc.gui.CaptureTab;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-
-import java.util.List;
 
 public class ChangeBackgroundTypeEvent implements EventHandler<ActionEvent> {
 
     private final BackgroundLineChart.BackgroundType backgroundType;
-    private final List<CaptureTab> captureTabs;
+    private final Main main;
 
-    public ChangeBackgroundTypeEvent(BackgroundLineChart.BackgroundType backgroundType, List<CaptureTab> captureTabs) {
+    public ChangeBackgroundTypeEvent(BackgroundLineChart.BackgroundType backgroundType, Main main) {
         this.backgroundType = backgroundType;
-        this.captureTabs = captureTabs;
+        this.main = main;
     }
 
     @Override
     public void handle(ActionEvent event) {
-        this.captureTabs.forEach(e -> e.getCaptureSessionChart().getLineChart().setBackgroundType(this.backgroundType));
+        this.main.getCaptureTabs().forEach(e -> {
+            e.getCaptureSessionChart().getLineChart().setBackgroundType(this.backgroundType);
+            e.getCaptureSessionChart().getLineChart().redraw();
+        });
+        this.main.setDefaultBackgroundType(this.backgroundType);
     }
 
 }

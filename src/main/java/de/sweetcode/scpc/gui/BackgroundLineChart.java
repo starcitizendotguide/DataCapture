@@ -11,17 +11,11 @@ import javafx.scene.shape.Polygon;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 public class BackgroundLineChart extends LineChart<Number, Number> {
 
     private final CaptureSession captureSession;
     private BackgroundType backgroundType = BackgroundType.NONE;
-
-    public BackgroundLineChart(CaptureSession captureSession, Axis<Number> xAxis, Axis<Number> yAxis) {
-        super(xAxis, yAxis);
-        this.captureSession = captureSession;
-    }
 
     public BackgroundLineChart(CaptureSession captureSession, Axis<Number> xAxis, Axis<Number> yAxis, ObservableList<Series<Number, Number>> data) {
         super(xAxis, yAxis, data);
@@ -111,19 +105,6 @@ public class BackgroundLineChart extends LineChart<Number, Number> {
                     DataPoint current = captureSession.get(data.get(i).getXValue().intValue());
                     DataPoint post = (i == data.size() - 1 ? null : captureSession.get(data.get(i + 1).getXValue().intValue()));
 
-                    /*double highestPreValue = pre == null ? ground : pre.getData().entrySet().stream()
-                            .max(Map.Entry.comparingByValue((a, b) -> (Double.compare(a.doubleValue(), b.doubleValue()))))
-                            .get().getValue().doubleValue();*/
-                    /*
-                    double highestCurrentValue = current.getData().entrySet().stream()
-                            .max(Map.Entry.comparingByValue((a, b) -> (Double.compare(a.doubleValue(), b.doubleValue()))))
-                            .get().getValue().doubleValue();
-
-                    double highestPostValue = post == null ? ground : post.getData().entrySet().stream()
-                            .max(Map.Entry.comparingByValue((a, b) -> (Double.compare(a.doubleValue(), b.doubleValue()))))
-                            .get().getValue().doubleValue();
-                     */
-
                     double highestPreValue = (pre == null ? ground : Double.NEGATIVE_INFINITY);
                     if(!(pre == null)) {
                         Iterator<Series<Number, Number>> preIterator = this.getData().iterator();
@@ -205,8 +186,9 @@ public class BackgroundLineChart extends LineChart<Number, Number> {
                             getPlotChildren().add(polygon);
                             polygon.toBack();
 
-                            polygon.setOpacity(1D);
+                            polygon.setOpacity(0.2D);
                             polygon.setFill(new ImagePattern(current.getGameState().getBackground()));
+
 
                             polygon = new Polygon();
                             bottom = new LinkedList<>();
