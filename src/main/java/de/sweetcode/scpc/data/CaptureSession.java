@@ -9,8 +9,10 @@ public class CaptureSession {
 
     private long sessionId;
 
+    private GPUInformation gpuInformation = new GPUInformation();
+    private GameInformation gameInformation = new GameInformation("", "");
+
     private List<DataPoint> dataPoints = new LinkedList<>();
-    private GPUInformation gpuInformation;
 
     private Map<Class, List<Listener>> listeners = new HashMap<>();
 
@@ -49,6 +51,10 @@ public class CaptureSession {
         return this.dataPoints;
     }
 
+    public GameInformation getGameInformation() {
+        return this.gameInformation;
+    }
+
     public GPUInformation getGPUInformation() {
         return this.gpuInformation;
     }
@@ -63,10 +69,22 @@ public class CaptureSession {
 
     public void setGPUInformation(GPUInformation gpuInformation) {
         this.gpuInformation = gpuInformation;
+        this.notifyListeners(gpuInformation);
+    }
 
-        if(this.listeners.containsKey(GPUInformation.class)) {
-            this.listeners.get(GPUInformation.class).forEach(e -> e.captured(gpuInformation));
-        }
+    public void setGameInformation(GameInformation gameInformation) {
+        this.gameInformation = gameInformation;
+        this.notifyListeners(gameInformation);
+    }
+
+    /**
+     * Adds a new data point and calls all associated listeners.
+     * @param dataPoint The data point.
+     */
+    public void add(DataPoint dataPoint) {
+        this.dataPoints.add(dataPoint);
+        this.notifyListeners(dataPoint);
+        this.notifyListeners(dataPoint.getGameState());
     }
 
     /**
@@ -80,17 +98,17 @@ public class CaptureSession {
         this.listeners.get(type).add(listener);
     }
 
-    /**
-     * Adds a new data point and calls all associated listeners.
-     * @param dataPoint The data point.
-     */
-    public void add(DataPoint dataPoint) {
-        this.dataPoints.add(dataPoint);
-        if(this.listeners.containsKey(DataPoint.class)) {
-            this.listeners.get(DataPoint.class).forEach(e -> e.captured(dataPoint));
+    private <T> void notifyListeners(T data) {
+
+        Class clazz = data.getClass();
+
+        //@HACKY: This is for enums that implement an interface like (GameStates).
+        if(data instanceof Enum<?>) {
+            clazz = data.getClass().getSuperclass().getInterfaces()[0];
         }
-        if(this.listeners.containsKey(GameState.class)) {
-            this.listeners.get(GameState.class).forEach(e -> e.captured(dataPoint.getGameState()));
+
+        if(this.listeners.containsKey(clazz)) {
+            this.listeners.get(clazz).forEach(e -> e.captured(data));
         }
     }
 

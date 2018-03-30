@@ -53,7 +53,15 @@ public class LoadFileActionEvent implements EventHandler<ActionEvent> {
                 //--- Root
                 JsonObject root = gson.fromJson(data, JsonObject.class);
 
-                CaptureSession captureSession = new CaptureSession(root.get("sessionId").getAsLong());
+                long sessionId = root.get("sessionId").getAsLong();
+
+                if(this.main.hasSession(sessionId)) {
+                    Utils.popup("File - Load", String.format("A session with the id (%d) is already open. Please close " +
+                            "the tab before loading this file.", sessionId), Alert.AlertType.ERROR, false);
+                    return;
+                }
+
+                CaptureSession captureSession = new CaptureSession(sessionId);
                 this.main.addCaptureSession(captureSession, true); //NOTE It has to be added here so that the triggers can listen
 
                 //--- Data Points
@@ -95,6 +103,14 @@ public class LoadFileActionEvent implements EventHandler<ActionEvent> {
                     }
                 }
                 captureSession.setGPUInformation(gpuInformation);
+
+                //--- Game Information
+                JsonObject gameInformationObject = root.getAsJsonObject("game");
+                GameInformation gameInformation = new GameInformation(
+                        gameInformationObject.get("version").getAsString(),
+                        gameInformationObject.get("branch").getAsString()
+                );
+                captureSession.setGameInformation(gameInformation);
 
 
             } catch (JsonParseException exception) {

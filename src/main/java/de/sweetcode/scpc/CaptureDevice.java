@@ -141,6 +141,18 @@ public class CaptureDevice implements Runnable {
                     CaptureTab finalCaptureTab = captureTab;
                     GameState finalGameState = gameState;
 
+                    //--- Version
+                    if(
+                        captureTab.getCaptureSession().getGameInformation().isEmpty() &&
+                        finalObject.has("Version") &&
+                        finalObject.has("Branch")
+                    ) {
+                        captureTab.getCaptureSession().setGameInformation(new GameInformation(
+                                finalObject.get("Version").getAsString(),
+                                finalObject.get("Branch").getAsString()
+                        ));
+                    }
+
                     //--- Heartbeat
                     switch (event) {
                         case "Heartbeat":

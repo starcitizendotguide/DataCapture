@@ -1,10 +1,7 @@
 package de.sweetcode.scpc.gui;
 
 import de.sweetcode.scpc.Main;
-import de.sweetcode.scpc.data.CaptureSession;
-import de.sweetcode.scpc.data.DataPoint;
-import de.sweetcode.scpc.data.GPUInformation;
-import de.sweetcode.scpc.data.GameState;
+import de.sweetcode.scpc.data.*;
 import de.sweetcode.scpc.handlers.FileSaveAsActionEvent;
 import de.sweetcode.scpc.handlers.TabCloseEvent;
 import javafx.application.Platform;
@@ -33,6 +30,7 @@ public class CaptureTab extends Tab {
     private Label packagesCapturedLabel = new Label("Packages Captured: -");
     private Label statusLabel = new Label("-");
     private Label gameStateLabel = new Label("Game State: -");
+    private Label gameVersionLabel = new Label("Game Version: -");
 
     /**
      * @param main The main instance of the program.
@@ -125,7 +123,8 @@ public class CaptureTab extends Tab {
                 this.gpuLabel,
                 this.packagesCapturedLabel,
                 this.statusLabel,
-                this.gameStateLabel
+                this.gameStateLabel,
+                this.gameVersionLabel
         );
         pane.setBottom(infoLabels);
 
@@ -145,6 +144,14 @@ public class CaptureTab extends Tab {
 
         this.captureSession.addListener(GameState.class, gameState -> {
             Platform.runLater(() -> this.gameStateLabel.setText(String.format("Game State: %s", gameState.getName())));
+        });
+
+        this.captureSession.addListener(GameInformation.class, gameInformation -> {
+            Platform.runLater(() -> this.gameVersionLabel.setText(String.format("Game Version: %s (%s)",
+                        gameInformation.getVersion(),
+                        gameInformation.getBranch())
+                    )
+            );
         });
 
         //---
