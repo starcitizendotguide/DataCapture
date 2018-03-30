@@ -1,8 +1,6 @@
 package de.sweetcode.scpc.data;
 
-import de.sweetcode.scpc.gui.DataPointTooltip;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.Tooltip;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

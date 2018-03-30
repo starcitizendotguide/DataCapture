@@ -112,7 +112,6 @@ public class LoadFileActionEvent implements EventHandler<ActionEvent> {
                 );
                 captureSession.setGameInformation(gameInformation);
 
-
             } catch (JsonParseException exception) {
                 Utils.popup("File - Load", exception.getMessage(), Alert.AlertType.ERROR, false);
                 return;
