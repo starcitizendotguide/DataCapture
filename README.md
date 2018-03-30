@@ -28,7 +28,7 @@ this tool requires to capture the data without it the program wont work.
  a new session, so you can keep all of your runs organized.
  - JSON Export - Do you wanna use the captured data anywhere else? No problem, you can output all sessions into files.
 
-### Example
+### Example - 1h Play Session - PTU & Arena Commander
 
-![Example Image](https://screenshotscdn.firefoxusercontent.com/images/7547b353-8fb0-405b-a0a4-4a21145a9c3d.png)
+![Example Image](https://screenshotscdn.firefoxusercontent.com/images/0cae144b-7b9e-4e75-8e49-32b50f6ccf83.png)
 
