@@ -121,7 +121,7 @@ public class BackgroundLineChart extends LineChart<Number, Number> {
                     getPlotChildren().add(polygon);
                     polygon.toBack();
 
-                    polygon.setOpacity(0.4D);
+                    polygon.setOpacity(0.3D);
 
                     switch (this.backgroundType) {
                         case COLOUR: polygon.setFill(this.captureSession.get(i).getGameState().getBackgroundGradient()); break;

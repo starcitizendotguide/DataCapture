@@ -56,9 +56,9 @@ public enum GameStates implements GameState {
 
         private final Image image = new Image("pu.jpg");
         private final LinearGradient linearGrad = new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE,
-                new Stop(0.1f, Color.rgb(255, 0, 0, .3)),
-                new Stop(0.5f, Color.rgb(127, 0, 127, .3)),
-                new Stop(1.0f, Color.rgb(0, 0, 255, .3)));
+                new Stop(0.1f, Color.rgb(255, 0, 0, 1)),
+                new Stop(0.5f, Color.rgb(127, 0, 127, 1)),
+                new Stop(1.0f, Color.rgb(0, 0, 255, 1)));
 
         @Override
         public String getName() {
@@ -84,9 +84,9 @@ public enum GameStates implements GameState {
 
         private final Image image = new Image("sm.jpg");
         private final LinearGradient linearGrad = new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE,
-                new Stop(0.1f, Color.rgb(249, 248, 113, 0.302)),
-                new Stop(0.5f, Color.rgb(255, 199, 95, 0.302)),
-                new Stop(1.0f, Color.rgb(255, 150, 113, 0.302)));
+                new Stop(0.1f, Color.rgb(249, 248, 113, 1)),
+                new Stop(0.5f, Color.rgb(255, 199, 95, 1)),
+                new Stop(1.0f, Color.rgb(255, 150, 113, 1)));
 
         @Override
         public String getName() {
@@ -112,9 +112,9 @@ public enum GameStates implements GameState {
 
         private final Image image = new Image("ac.jpg");
         private final LinearGradient linearGrad = new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE,
-                new Stop(0.1f, Color.rgb(194, 94, 94, 0.302)),
-                new Stop(0.5f, Color.rgb(96, 84, 125, 0.302)),
-                new Stop(1.0f, Color.rgb(47, 72, 88, 0.302)));
+                new Stop(0.1f, Color.rgb(21, 153, 87, 1)),
+                new Stop(0.5f, Color.rgb(21, 120, 120)),
+                new Stop(1.0f, Color.rgb(21, 87, 153, 1)));
 
         @Override
         public String getName() {
@@ -134,6 +134,27 @@ public enum GameStates implements GameState {
         @Override
         public LinearGradient getBackgroundGradient() {
             return this.linearGrad;
+        }
+    },
+    HANGAR {
+        @Override
+        public String getName() {
+            return "Hangar";
+        }
+
+        @Override
+        public Image getBackground() {
+            return null;
+        }
+
+        @Override
+        public boolean detect(String map) {
+            return (map != null && map.equalsIgnoreCase("hangarapp"));
+        }
+
+        @Override
+        public LinearGradient getBackgroundGradient() {
+            return null;
         }
     },
     UNKNOWN {

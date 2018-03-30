@@ -69,7 +69,6 @@ public class CaptureSessionChart {
         for (DataPoint.Type type : DataPoint.Types.values()) {
             XYChart.Series<Number, Number> series = new XYChart.Series<>();
             series.setName(type.getName());
-            //lineChart.getData().add(series);
             seriesList.add(series);
             this.seriesMap.put(type, series);
         }
