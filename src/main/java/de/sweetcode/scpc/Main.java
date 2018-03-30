@@ -24,11 +24,12 @@ public class Main extends Application {
 
     private final ExecutorService threadPool = Executors.newWorkStealingPool();
 
-    private Stage stage;
-    private final TabPane tabPane = new TabPane();
 
+    //---
+    private final TabPane tabPane = new TabPane();
     private final List<CaptureTab> captureTabs = new ArrayList<>();
 
+    private Stage stage;
     private BackgroundLineChart.BackgroundType defaultBackgroundType = BackgroundLineChart.BackgroundType.NONE;
 
     public Main() {}
@@ -79,9 +80,6 @@ public class Main extends Application {
 
         stage.setTitle("StarCitizen - Data CaptureSession by u/yonasismad (github.com/sweetcode)");
         stage.setOnCloseRequest(new ApplicationCloseEvent(this));
-
-        //--- Default Tab
-        this.addCaptureSession(new CaptureSession(), false);
 
         //---
         BorderPane borderPane = new BorderPane();

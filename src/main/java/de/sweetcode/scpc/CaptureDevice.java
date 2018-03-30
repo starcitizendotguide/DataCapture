@@ -124,13 +124,7 @@ public class CaptureDevice implements Runnable {
                     if(finalObject.has("sessionid")) {
                         long sessionId = finalObject.get("sessionid").getAsLong();
 
-                        //--- Default Session
-                        if(this.main.hasSession(-1)) {
-                            captureTab = this.main.getCaptureTab(-1);
-                            captureTab.getCaptureSession().setSessionId(sessionId);
-                            CaptureTab finalCaptureTab1 = captureTab;
-                            Platform.runLater(() -> finalCaptureTab1.setText(String.format("Session - %d", sessionId)));
-                        } else if(this.main.hasSession(sessionId)) {
+                        if(this.main.hasSession(sessionId)) {
                             captureTab = this.main.getCaptureTab(sessionId);
                         } else if(!(this.main.hasSession(sessionId)) && !(event.equals("Game Quit"))) {
                             this.main.addCaptureSession(new CaptureSession(sessionId), false);
