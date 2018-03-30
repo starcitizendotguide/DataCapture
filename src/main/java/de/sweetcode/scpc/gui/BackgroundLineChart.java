@@ -5,6 +5,7 @@ import de.sweetcode.scpc.data.DataPoint;
 import javafx.collections.ObservableList;
 import javafx.scene.chart.Axis;
 import javafx.scene.chart.LineChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Polygon;
 
@@ -38,165 +39,101 @@ public class BackgroundLineChart extends LineChart<Number, Number> {
         // Polygons disappear.
         this.getPlotChildren().removeIf(e -> e instanceof Polygon);
 
-        switch (this.backgroundType) {
+        if(this.backgroundType == BackgroundType.NONE) return;
 
-            case NONE: break;
+        Polygon polygon = new Polygon();
+        final double ground = this.getYAxis().getDisplayPosition(0);
 
-            case COLOUR: {
-                final double ground = this.getYAxis().getDisplayPosition(0);
+        boolean inMiddle = false;
+        List<Double> bottom = new LinkedList<>();
 
-                for(int i = 0; i < getData().get(0).getData().size() - 1; i++) {
+        Series series = this.getData().get(0);
+        ObservableList<Data<Number,Number>> data = series.getData();
 
-                    if(this.captureSession.get(i).getGameState().getBackgroundGradient() == null) {
-                        continue;
-                    }
+        for(int i = 0; i < this.getData().get(0).getData().size(); i++) {
 
-                    double currentMax = Double.NEGATIVE_INFINITY;
-                    Iterator<Series<Number, Number>> currentIterator = this.getData().iterator();
-                    while (currentIterator.hasNext()) {
-                        Data<Number, Number> data = currentIterator.next().getData().get(i);
-                        if(data.getNode().isVisible()) {
-                            currentMax = Math.max(data.getYValue().doubleValue(), currentMax);
-                        }
-                    }
+            //
+            DataPoint pre = (i == 0 ? null : captureSession.get(data.get(i).getXValue().intValue()));
+            DataPoint current = captureSession.get(data.get(i).getXValue().intValue());
+            DataPoint post = (i == data.size() - 1 ? null : captureSession.get(data.get(i + 1).getXValue().intValue()));
 
-                    double postMax = Double.NEGATIVE_INFINITY;
-                    Iterator<Series<Number, Number>> postIterator = this.getData().iterator();
-                    while (postIterator.hasNext()) {
-                        Data<Number, Number> data = postIterator.next().getData().get(i + 1);
-                        if(data.getNode().isVisible()) {
-                            postMax = Math.max(data.getYValue().doubleValue(), postMax);
-                        }
-                    }
+            double highestPreValue = (pre == null ? ground : highestYValue((i - 1)));
+            double highestCurrentValue = highestYValue(i);
+            double highestPostValue = (post == null ? ground : highestYValue((i + 1)));
 
-                    double x = getXAxis().getDisplayPosition(this.getData().get(0).getData().get(i).getXValue());
-                    double y = getYAxis().getDisplayPosition(currentMax);
-                    double x2 = getXAxis().getDisplayPosition(this.getData().get(0).getData().get(i + 1).getXValue());
-                    double y2 = getYAxis().getDisplayPosition(postMax);
-                    Polygon polygon = new Polygon();
+            //--
+            double preX = (i == 0 ? ground : this.getXAxis().getDisplayPosition(data.get(i-1).getXValue()));
+            double preY = (i == 0 ? ground : this.getYAxis().getDisplayPosition(highestPreValue));
+
+            double currX = (this.getXAxis().getDisplayPosition(current.getData(DataPoint.Types.VEHICLES_AI).getXValue()));
+            double currY = (this.getYAxis().getDisplayPosition(highestCurrentValue));
+
+            double postX = (post == null ? ground : this.getXAxis().getDisplayPosition(data.get(i+1).getXValue()));
+            double postY = (post == null ? ground : this.getYAxis().getDisplayPosition(highestPostValue));
+
+            //--- Start
+            if(polygon.getPoints().isEmpty() && current.getGameState().getBackground() != null) {
+                polygon.getPoints().addAll(
+                        currX,ground, currX,currY
+                );
+                inMiddle = true;
+            }
+            //--- Middle
+            else if(inMiddle) {
+                inMiddle = (post != null && current.getGameState() == post.getGameState());
+
+                if(inMiddle) {
+                    polygon.getPoints().addAll(
+                            preX,preY, currX, currY,
+                            currX, currY, postX, postY
+                    );
+                    bottom.add(preX);
+                    bottom.add(ground);
+                    bottom.add(currX);
+                    bottom.add(ground);
+                    bottom.add(currX);
+                    bottom.add(ground);
+                    bottom.add(postX);
+                    bottom.add(ground);
+                } else {
 
                     polygon.getPoints().addAll(
-                            x, ground, x,y,
-                            x,y, x2,y2,
-                            x2,y2, x2,ground,
-                            x2,ground, x,ground
+                            preX,preY, currX, currY,
+                            currX,currY, currX,ground,
+                            currX,ground,preX,ground
                     );
+
+                    polygon.getPoints().addAll(bottom);
                     getPlotChildren().add(polygon);
-                    polygon.toFront();
-                    polygon.setFill(this.captureSession.get(i).getGameState().getBackgroundGradient());
+                    polygon.toBack();
+
+                    polygon.setOpacity(0.2D);
+
+                    switch (this.backgroundType) {
+                        case COLOUR: polygon.setFill(this.captureSession.get(i).getGameState().getBackgroundGradient()); break;
+                        case IMAGE: polygon.setFill(new ImagePattern(current.getGameState().getBackground())); break;
+                    }
+
+
+                    polygon = new Polygon();
+                    bottom = new LinkedList<>();
                 }
-            } break;
+            }
 
-            case IMAGE: {
-
-                Polygon polygon = new Polygon();
-                final double ground = this.getYAxis().getDisplayPosition(0);
-
-                boolean inMiddle = false;
-                List<Double> bottom = new LinkedList<>();
-
-                Series series = this.getData().get(0);
-                ObservableList<Data<Number,Number>> data = series.getData();
-
-                for(int i = 0; i < this.getData().get(0).getData().size(); i++) {
-
-                    //
-                    DataPoint pre = (i == 0 ? null : captureSession.get(data.get(i).getXValue().intValue()));
-                    DataPoint current = captureSession.get(data.get(i).getXValue().intValue());
-                    DataPoint post = (i == data.size() - 1 ? null : captureSession.get(data.get(i + 1).getXValue().intValue()));
-
-                    double highestPreValue = (pre == null ? ground : Double.NEGATIVE_INFINITY);
-                    if(!(pre == null)) {
-                        Iterator<Series<Number, Number>> preIterator = this.getData().iterator();
-                        while (preIterator.hasNext()) {
-                            Data<Number, Number> numberData = preIterator.next().getData().get(i - 1);
-                            if (numberData.getNode().isVisible()) {
-                                highestPreValue = Math.max(numberData.getYValue().doubleValue(), highestPreValue);
-                            }
-                        }
-                    }
-
-                    double highestCurrentValue = Double.NEGATIVE_INFINITY;
-                    Iterator<Series<Number, Number>> currentIterator = this.getData().iterator();
-                    while (currentIterator.hasNext()) {
-                        Data<Number, Number> numberData = currentIterator.next().getData().get(i);
-                        if(numberData.getNode().isVisible()) {
-                            highestCurrentValue = Math.max(numberData.getYValue().doubleValue(), highestCurrentValue);
-                        }
-                    }
-
-                    double highestPostValue = (post == null ? ground : Double.NEGATIVE_INFINITY);
-                    if(!(post == null)) {
-                        Iterator<Series<Number, Number>> postIterator = this.getData().iterator();
-                        while (postIterator.hasNext()) {
-                            Data<Number, Number> numberData = postIterator.next().getData().get(i + 1);
-                            if (numberData.getNode().isVisible()) {
-                                highestPostValue = Math.max(numberData.getYValue().doubleValue(), highestPostValue);
-                            }
-                        }
-                    }
-
-
-
-                    //--
-                    double preX = (i == 0 ? ground : this.getXAxis().getDisplayPosition(data.get(i-1).getXValue()));
-                    double preY = (i == 0 ? ground : this.getYAxis().getDisplayPosition(highestPreValue));
-
-                    double currX = (this.getXAxis().getDisplayPosition(current.getData(DataPoint.Types.VEHICLES_AI).getXValue()));
-                    double currY = (this.getYAxis().getDisplayPosition(highestCurrentValue));
-
-                    double postX = (post == null ? ground : this.getXAxis().getDisplayPosition(data.get(i+1).getXValue()));
-                    double postY = (post == null ? ground : this.getYAxis().getDisplayPosition(highestPostValue));
-
-                    //--- Start
-                    if(polygon.getPoints().isEmpty() && current.getGameState().getBackground() != null) {
-                        polygon.getPoints().addAll(
-                                currX,ground, currX,currY
-                        );
-                        inMiddle = true;
-                    }
-                    //--- Middle
-                    else if(inMiddle) {
-                        inMiddle = (post != null && current.getGameState() == post.getGameState());
-
-                        if(inMiddle) {
-                            polygon.getPoints().addAll(
-                                    preX,preY, currX, currY,
-                                    currX, currY, postX, postY
-                            );
-                            bottom.add(preX);
-                            bottom.add(ground);
-                            bottom.add(currX);
-                            bottom.add(ground);
-                            bottom.add(currX);
-                            bottom.add(ground);
-                            bottom.add(postX);
-                            bottom.add(ground);
-                        } else {
-
-                            polygon.getPoints().addAll(
-                                    preX,preY, currX, currY,
-                                    currX,currY, currX,ground,
-                                    currX,ground,preX,ground
-                            );
-
-                            polygon.getPoints().addAll(bottom);
-                            getPlotChildren().add(polygon);
-                            polygon.toBack();
-
-                            polygon.setOpacity(0.2D);
-                            polygon.setFill(new ImagePattern(current.getGameState().getBackground()));
-
-
-                            polygon = new Polygon();
-                            bottom = new LinkedList<>();
-                        }
-                    }
-
-                }
-
-            } break;
         }
+
+    }
+
+    private double highestYValue(int index) {
+        Iterator<Series<Number, Number>> iterator = this.getData().iterator();
+        double max = Double.NEGATIVE_INFINITY;
+        while (iterator.hasNext()) {
+            Data<Number, Number> numberData = iterator.next().getData().get(index);
+            if (numberData.getNode().isVisible()) {
+                max = Math.max(numberData.getYValue().doubleValue(), max);
+            }
+        }
+        return max;
     }
 
     public enum BackgroundType {

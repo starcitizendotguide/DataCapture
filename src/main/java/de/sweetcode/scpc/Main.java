@@ -6,6 +6,7 @@ import de.sweetcode.scpc.gui.CaptureTab;
 import de.sweetcode.scpc.handlers.ApplicationCloseEvent;
 import de.sweetcode.scpc.handlers.ChangeBackgroundTypeEvent;
 import de.sweetcode.scpc.handlers.LoadFileActionEvent;
+import de.sweetcode.scpc.handlers.OpenDebugConsoleEvent;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
@@ -28,6 +29,7 @@ public class Main extends Application {
     //---
     private final TabPane tabPane = new TabPane();
     private final List<CaptureTab> captureTabs = new ArrayList<>();
+    private final TextArea debugConsole = new TextArea();
 
     private Stage stage;
     private BackgroundLineChart.BackgroundType defaultBackgroundType = BackgroundLineChart.BackgroundType.NONE;
@@ -71,6 +73,11 @@ public class Main extends Application {
         return this.captureTabs.stream().anyMatch(e -> e.getCaptureSession().getSessionId() == sessionId);
     }
 
+    public void logToDebugConsole(String message) {
+        this.debugConsole.setText(String.format("%s\n%s", this.debugConsole.getText(), message));
+        System.out.println(message);
+    }
+
     @Override
     public void start(Stage stage) {
 
@@ -104,6 +111,11 @@ public class Main extends Application {
         backgroundImage.setOnAction(new ChangeBackgroundTypeEvent(BackgroundLineChart.BackgroundType.IMAGE, this));
 
         backgroundMenu.getItems().addAll(backgroundNone, backgroundColour, backgroundImage);
+
+        /*Menu debugMenu = new Menu("Debug Console");
+        MenuItem openLol = new MenuItem("Open");
+        debugMenu.getItems().addAll(openLol);
+        openLol.setOnAction(new OpenDebugConsoleEvent(this, this.debugConsole));*/
 
         menuBar.getMenus().addAll(menu, backgroundMenu);
         borderPane.setTop(menuBar);

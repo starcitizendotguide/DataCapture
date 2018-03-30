@@ -83,7 +83,7 @@ public class CaptureDevice implements Runnable {
                 Utils.popup("Exception", "The handle is not open.", Alert.AlertType.ERROR, false);
                 return;
             } catch (IllegalArgumentException ignore) {
-                System.out.println(":UnexplainableError ");
+                this.main.logToDebugConsole(":UnexplainableError ");
             }
 
             if (packet == null) {
@@ -101,7 +101,7 @@ public class CaptureDevice implements Runnable {
                     try {
                          object = gson.fromJson(payload, JsonObject.class);
                     } catch (JsonSyntaxException exception) {
-                        System.out.println("Captured invalid package payload: " + payload);
+                        this.main.logToDebugConsole("Captured invalid package payload: " + payload);
                     }
 
                     if(object == null) continue;
@@ -116,7 +116,7 @@ public class CaptureDevice implements Runnable {
                        gameState = GameStates.byMap(finalObject.get("map").getAsString());
 
                         if(gameState == GameStates.UNKNOWN) {
-                            System.out.println(String.format("Unhandled Game State: '%s' ", finalObject.get("map").getAsString()));
+                            this.main.logToDebugConsole(String.format("Unhandled Game State: '%s' ", finalObject.get("map").getAsString()));
                         }
                     }
 
@@ -134,7 +134,7 @@ public class CaptureDevice implements Runnable {
                             throw new IllegalStateException();
                         }
                     } else {
-                        System.out.println("Waiting for packet with session id...");
+                        this.main.logToDebugConsole("Waiting for packet with session id...");
                         continue;
                     }
 
@@ -154,25 +154,24 @@ public class CaptureDevice implements Runnable {
                             break;
                         //--- BOOT: GPU DESCRIPTION
                         case "boot_gpu_desc":
-                            captureTab.setStatusText("Star Citizen is booting...", Alert.AlertType.INFORMATION);
 
                             GPUInformation gpuInformation = new GPUInformation();
                             for (DataPoint.Type type : GPUInformation.Types.values()) {
                                 if (finalObject.has(type.getPacketKey())) {
                                     gpuInformation.add(type, finalObject.get(type.getPacketKey()).getAsString());
                                 } else {
-                                    System.out.println(String.format("boot_gpu_desc is missing '%s'", type.getPacketKey()));
+                                    this.main.logToDebugConsole(String.format("boot_gpu_desc is missing '%s'", type.getPacketKey()));
                                 }
                             }
                             captureTab.getCaptureSession().setGPUInformation(gpuInformation);
 
                             break;
                         case "Game Quit":
-                            System.out.println("Game Quit -> " + payload);
-                            captureTab.setStatusText("Star Citizen closed", Alert.AlertType.INFORMATION);
+                            this.main.logToDebugConsole(("Game Quit -> " + payload));
+                            captureTab.setStatusText("Capturing stopped", Alert.AlertType.INFORMATION);
                             break;
                         default:
-                            System.out.println("Event: " + event + " -> " + payload);
+                            this.main.logToDebugConsole("Event: " + event + " -> " + payload);
                             break;
                     }
 
