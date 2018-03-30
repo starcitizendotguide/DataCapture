@@ -151,9 +151,7 @@ public class BackgroundLineChart extends LineChart<Number, Number> {
                     //--- Start
                     if(polygon.getPoints().isEmpty() && current.getGameState().getBackground() != null) {
                         polygon.getPoints().addAll(
-                                currX,ground,   preX,ground,
-                                preX,ground,    preX,preY,
-                                preX,preY,      currX,currY
+                                currX,ground, currX,currY
                         );
                         inMiddle = true;
                     }
