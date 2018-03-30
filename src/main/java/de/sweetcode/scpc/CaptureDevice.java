@@ -113,7 +113,13 @@ public class CaptureDevice implements Runnable {
 
                     //--- Determine GameState
                     if(finalObject.has("map")) {
-                       gameState = GameStates.byMap(finalObject.get("map").getAsString());
+                        gameState = GameStates.byMap(finalObject.get("map").getAsString());
+
+                        if(gameState == GameStates.UNKNOWN) {
+                            this.main.logToDebugConsole(String.format("Unhandled Game State: '%s' ", finalObject.get("map").getAsString()));
+                        }
+                    } else if(finalObject.has("Map")) {
+                        gameState = GameStates.byMap(finalObject.get("Map").getAsString());
 
                         if(gameState == GameStates.UNKNOWN) {
                             this.main.logToDebugConsole(String.format("Unhandled Game State: '%s' ", finalObject.get("map").getAsString()));
