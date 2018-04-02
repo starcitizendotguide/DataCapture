@@ -3,6 +3,8 @@ package de.sweetcode.scpc.handlers;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import de.sweetcode.scpc.Main;
+import de.sweetcode.scpc.crash.CrashReport;
 import de.sweetcode.scpc.data.DataPoint;
 import de.sweetcode.scpc.Utils;
 import de.sweetcode.scpc.data.GPUInformation;
@@ -56,35 +58,61 @@ public class FileSaveAsActionEvent implements EventHandler<ActionEvent> {
             //--- Data Points
             List<DataPoint> dataPoints = this.captureTab.getCaptureSession().getDataPoints();
             JsonArray dataPointsArray = new JsonArray();
+            {
+                for (DataPoint entry : dataPoints) {
+                    JsonObject object = new JsonObject();
 
-            for(DataPoint entry : dataPoints) {
-                JsonObject object = new JsonObject();
+                    object.addProperty("index", entry.getTime());
+                    object.addProperty("gameState", entry.getGameState().getName());
 
-                object.addProperty("index", entry.getTime());
-                object.addProperty("gameState", entry.getGameState().getName());
-
-                for(DataPoint.Type type : DataPoint.Types.values()) {
-                    object.addProperty(type.getSerializationKey(), entry.getData(type).getYValue());
+                    for (DataPoint.Type type : DataPoint.Types.values()) {
+                        object.addProperty(type.getSerializationKey(), entry.getData(type).getYValue());
+                    }
+                    dataPointsArray.add(object);
                 }
-                dataPointsArray.add(object);
             }
 
             //--- GPU Information
             JsonObject gpuObject = new JsonObject();
             GPUInformation gpuInformation = this.captureTab.getCaptureSession().getGPUInformation();
-            gpuInformation.getData().forEach((k, v) -> gpuObject.addProperty(k.getSerializationKey(), v));
+
+            {
+                gpuInformation.getData().forEach((k, v) -> gpuObject.addProperty(k.getSerializationKey(), v));
+            }
 
             //--- Game Information
             JsonObject gameInformationObject = new JsonObject();
             GameInformation gameInformation = this.captureTab.getCaptureSession().getGameInformation();
-            gameInformationObject.addProperty("version", gameInformation.getVersion());
-            gameInformationObject.addProperty("branch", gameInformation.getBranch());
+            {
+                gameInformationObject.addProperty("version", gameInformation.getVersion());
+                gameInformationObject.addProperty("branch", gameInformation.getBranch());
+            }
+
+            //--- Crash Information
+            JsonObject crashInformationObject = new JsonObject();
+            if(Main.FEATURE_CRASH_REPORT) {
+                CrashReport crashReport = this.captureTab.getCaptureSession().getCrashReport();
+
+                {
+                    crashInformationObject.addProperty("isGracefullyShutdown", crashReport.isGracefullyShutdown());
+                }
+
+                {
+                    final JsonObject crashDataObject = new JsonObject();
+                    crashReport.getCrashData().forEach((k, v) -> crashDataObject.addProperty(k.getSerializationKey(), v));
+                    crashInformationObject.add("data", crashDataObject);
+                }
+            }
+
 
             //--- Root Building
             root.addProperty("sessionId", this.captureTab.getCaptureSession().getSessionId());
             root.add("game", gameInformationObject);
             root.add("gpu", gpuObject);
             root.add("dataPoints", dataPointsArray);
+            if(Main.FEATURE_CRASH_REPORT) {
+                root.add("crashReport", crashInformationObject);
+            }
 
             try {
                 FileOutputStream fileOutputStream = new FileOutputStream(file, false);

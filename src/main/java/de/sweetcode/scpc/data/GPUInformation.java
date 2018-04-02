@@ -7,7 +7,11 @@ public class GPUInformation {
 
     private Map<DataPoint.Type, String> data = new LinkedHashMap<>();
 
-    public GPUInformation() {}
+    public GPUInformation() {
+        for(DataPoint.Type type : Types.values()) {
+            this.data.put(type, "N/A");
+        }
+    }
 
     public Map<DataPoint.Type, String> getData() {
         return this.data;

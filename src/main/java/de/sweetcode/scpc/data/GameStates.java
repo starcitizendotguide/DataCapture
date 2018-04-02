@@ -157,6 +157,48 @@ public enum GameStates implements GameState {
             return null;
         }
     },
+    SHUTDOWN_CRASHED {
+        @Override
+        public String getName() {
+            return "Game Crash";
+        }
+
+        @Override
+        public Image getBackground() {
+            return null;
+        }
+
+        @Override
+        public boolean detect(String map) {
+            return false;
+        }
+
+        @Override
+        public LinearGradient getBackgroundGradient() {
+            return null;
+        }
+    },
+    SHUTDOWN_GRACEFULLY {
+        @Override
+        public String getName() {
+            return "Shutdown Gracefully";
+        }
+
+        @Override
+        public Image getBackground() {
+            return null;
+        }
+
+        @Override
+        public boolean detect(String map) {
+            return false;
+        }
+
+        @Override
+        public LinearGradient getBackgroundGradient() {
+            return null;
+        }
+    },
     UNKNOWN {
         @Override
         public String getName() {

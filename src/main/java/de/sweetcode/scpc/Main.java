@@ -22,8 +22,9 @@ import java.util.concurrent.Executors;
 
 public class Main extends Application {
 
-    private final ExecutorService threadPool = Executors.newWorkStealingPool();
+    public final static boolean FEATURE_CRASH_REPORT = false;
 
+    private final ExecutorService threadPool = Executors.newWorkStealingPool();
 
     //---
     private final TabPane tabPane = new TabPane();
@@ -57,8 +58,8 @@ public class Main extends Application {
         }
     }
 
-    public void addCaptureSession(CaptureSession captureSession, boolean containsImportedData) {
-        CaptureTab tab = new CaptureTab(this, captureSession, containsImportedData);
+    public void addCaptureSession(CaptureSession captureSession) {
+        CaptureTab tab = new CaptureTab(this, captureSession);
         this.captureTabs.add(tab);
         tab.getCaptureSessionChart().getLineChart().setBackgroundType(this.defaultBackgroundType);
 
@@ -126,7 +127,7 @@ public class Main extends Application {
             Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
             List<NetworkInterface> unique = new ArrayList<>();
             for(NetworkInterface entry : Collections.list(networkInterfaces)) {
-               if(entry.getInetAddresses().hasMoreElements()) unique.add(entry);
+               if(!entry.isLoopback() && entry.getInetAddresses().hasMoreElements()) unique.add(entry);
             }
 
             ChoiceDialog<NetworkInterface> choiceDialog = new ChoiceDialog<>(unique.get(0), unique);

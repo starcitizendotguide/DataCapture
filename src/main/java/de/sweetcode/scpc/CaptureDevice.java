@@ -133,7 +133,7 @@ public class CaptureDevice implements Runnable {
                         if(this.main.hasSession(sessionId)) {
                             captureTab = this.main.getCaptureTab(sessionId);
                         } else if(!(this.main.hasSession(sessionId)) && !(event.equals("Game Quit"))) {
-                            this.main.addCaptureSession(new CaptureSession(sessionId), false);
+                            this.main.addCaptureSession(new CaptureSession(sessionId, false));
                             captureTab = this.main.getCaptureTab(sessionId);
                         } else {
                             //@TODO

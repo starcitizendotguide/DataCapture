@@ -1,34 +1,67 @@
 package de.sweetcode.scpc.data;
 
+import de.sweetcode.scpc.Main;
+import de.sweetcode.scpc.crash.CrashDetector;
+import de.sweetcode.scpc.crash.CrashReport;
+
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The CaptureSession represents one session worth of data.
  */
 public class CaptureSession {
 
+    private final static ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+
+
     private long sessionId;
+    private final boolean isArchived;
 
     private GPUInformation gpuInformation = new GPUInformation();
     private GameInformation gameInformation = new GameInformation("", "");
+    private CrashReport crashReport = new CrashReport();
 
     private List<DataPoint> dataPoints = new LinkedList<>();
 
     private Map<Class, List<Listener>> listeners = new HashMap<>();
 
+    private CrashDetector crashDetector = new CrashDetector();
+    private ScheduledFuture<?> scheduledTask;
+
     /**
-     * Creates a CaptureSession with the default id (-1).
+     * Creates a CaptureSession with the default id (-1) & archive.
      */
     public CaptureSession() {
-        this(-1L);
+        this(-1L, true);
     }
 
     /**
      * Creates a CaptureSession with the provided sessionId.
      * @param sessionId The session id the captured data belongs to.
      */
-    public CaptureSession(long sessionId) {
+    public CaptureSession(long sessionId, boolean isArchived) {
         this.sessionId = sessionId;
+        this.isArchived = isArchived;
+
+        if(Main.FEATURE_CRASH_REPORT) {
+            if (!(this.isArchived)) {
+                this.scheduledTask = CaptureSession.executor.scheduleAtFixedRate(this.crashDetector, 0, 5, TimeUnit.SECONDS);
+                this.crashDetector.addListener((crashReport) -> {
+                    this.crashReport = crashReport;
+                    this.scheduledTask.cancel(false);
+
+                    if (this.crashReport.isGracefullyShutdown()) {
+                        this.add(new DataPoint(GameStates.SHUTDOWN_GRACEFULLY, this.dataPoints.size()));
+                    } else {
+                        this.add(new DataPoint(GameStates.SHUTDOWN_CRASHED, this.dataPoints.size()));
+                    }
+                });
+            }
+        }
     }
 
     /**
@@ -39,10 +72,13 @@ public class CaptureSession {
         return this.sessionId;
     }
 
+    public boolean isArchived() {
+        return this.isArchived;
+    }
+
     public DataPoint get(int index) {
         return this.dataPoints.get(index);
     }
-
     /**
      * All data points.
      * @return A LinkedList, never null, but can be empty.
@@ -57,6 +93,10 @@ public class CaptureSession {
 
     public GPUInformation getGPUInformation() {
         return this.gpuInformation;
+    }
+
+    public CrashReport getCrashReport() {
+        return this.crashReport;
     }
 
     /**
@@ -75,6 +115,10 @@ public class CaptureSession {
     public void setGameInformation(GameInformation gameInformation) {
         this.gameInformation = gameInformation;
         this.notifyListeners(gameInformation);
+    }
+
+    public void setCrashReport(CrashReport crashReport) {
+        this.crashReport = crashReport;
     }
 
     /**

@@ -1,6 +1,9 @@
 package de.sweetcode.scpc.handlers;
 
 import com.google.gson.*;
+import de.sweetcode.scpc.crash.CrashDataType;
+import de.sweetcode.scpc.crash.CrashDataTypes;
+import de.sweetcode.scpc.crash.CrashReport;
 import de.sweetcode.scpc.data.*;
 import de.sweetcode.scpc.Main;
 import de.sweetcode.scpc.Utils;
@@ -61,8 +64,8 @@ public class LoadFileActionEvent implements EventHandler<ActionEvent> {
                     return;
                 }
 
-                CaptureSession captureSession = new CaptureSession(sessionId);
-                this.main.addCaptureSession(captureSession, true); //NOTE It has to be added here so that the triggers can listen
+                CaptureSession captureSession = new CaptureSession(sessionId, true);
+                this.main.addCaptureSession(captureSession); //NOTE It has to be added here so that the triggers can listen
 
                 //--- Data Points
                 JsonArray dataPointsArray = root.getAsJsonArray("dataPoints");
@@ -95,22 +98,49 @@ public class LoadFileActionEvent implements EventHandler<ActionEvent> {
                 });
 
                 //--- GPU
-                JsonObject gpuObject = root.getAsJsonObject("gpu");
                 GPUInformation gpuInformation = new GPUInformation();
-                for(DataPoint.Type type : GPUInformation.Types.values()) {
-                    if(gpuObject.has(type.getSerializationKey())) {
-                        gpuInformation.add(type, gpuObject.get(type.getSerializationKey()).getAsString());
+                if(root.has("gpu")) {
+                    JsonObject gpuObject = root.getAsJsonObject("gpu");
+                    for (DataPoint.Type type : GPUInformation.Types.values()) {
+                        if (gpuObject.has(type.getSerializationKey())) {
+                            gpuInformation.add(type, gpuObject.get(type.getSerializationKey()).getAsString());
+                        }
                     }
                 }
                 captureSession.setGPUInformation(gpuInformation);
 
                 //--- Game Information
-                JsonObject gameInformationObject = root.getAsJsonObject("game");
-                GameInformation gameInformation = new GameInformation(
-                        gameInformationObject.get("version").getAsString(),
-                        gameInformationObject.get("branch").getAsString()
-                );
-                captureSession.setGameInformation(gameInformation);
+                if(root.has("game")) {
+                    JsonObject gameInformationObject = root.getAsJsonObject("game");
+                    GameInformation gameInformation = new GameInformation(
+                            gameInformationObject.get("version").getAsString(),
+                            gameInformationObject.get("branch").getAsString()
+                    );
+                    captureSession.setGameInformation(gameInformation);
+                } else {
+                    captureSession.setGameInformation(new GameInformation("N/A", "N/A"));
+                }
+
+                //--- Crash Information
+                CrashReport crashReport = new CrashReport();
+                if(root.has("crashReport")) {
+                    JsonObject crashInformationObject = root.getAsJsonObject("crashReport");
+
+                    {
+                        crashReport.setGracefullyShutdown(crashInformationObject.get("isGracefullyShutdown").getAsBoolean());
+                    }
+
+                    {
+                        JsonObject crashData = crashInformationObject.getAsJsonObject("data");
+                        for(CrashDataType type : CrashDataTypes.values()) {
+                            if(crashData.has(type.getSerializationKey())) {
+                                crashReport.add(type, crashData.get(type.getSerializationKey()).getAsBoolean());
+                            }
+                        }
+                    }
+
+                }
+                captureSession.setCrashReport(crashReport);
 
             } catch (JsonParseException exception) {
                 Utils.popup("File - Load", exception.getMessage(), Alert.AlertType.ERROR, false);

@@ -21,6 +21,9 @@ public class DataPoint {
     public DataPoint(GameState gameState, long time) {
         this.gameState = gameState;
         this.time = time;
+        for(Type type : Types.values()) {
+            this.data.put(type, 0);
+        }
     }
 
     public Map<Type, Number> getData() {
