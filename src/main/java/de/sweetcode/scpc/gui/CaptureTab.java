@@ -3,6 +3,7 @@ package de.sweetcode.scpc.gui;
 import de.sweetcode.scpc.Main;
 import de.sweetcode.scpc.data.*;
 import de.sweetcode.scpc.handlers.FileSaveAsActionEvent;
+import de.sweetcode.scpc.handlers.SubmitDataHandler;
 import de.sweetcode.scpc.handlers.TabCloseEvent;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
@@ -101,13 +102,30 @@ public class CaptureTab extends Tab {
         //-- Menu
         MenuBar menuBar = new MenuBar();
 
-        Menu fileMenu = new Menu("File");
-        MenuItem saveAsMenuItem = new MenuItem("Save As");
+        {
+            Menu fileMenu = new Menu("File");
 
-        saveAsMenuItem.setOnAction(new FileSaveAsActionEvent(this));
+            {
+                MenuItem saveAsMenuItem = new MenuItem("Save As");
+                saveAsMenuItem.setOnAction(new FileSaveAsActionEvent(this));
+                fileMenu.getItems().add(saveAsMenuItem);
+            }
 
-        fileMenu.getItems().addAll(saveAsMenuItem);
-        menuBar.getMenus().add(fileMenu);
+            {
+                MenuItem submitMenuItem = new MenuItem("Submit");
+                submitMenuItem.setDisable(true);
+                this.captureSession.addListener(DataPoint.class, dataPoint -> {
+                    if(this.captureSession.getDataPoints().size() >= 100 && submitMenuItem.isDisable()) {
+                        submitMenuItem.setOnAction(new SubmitDataHandler(submitMenuItem, this));
+                        submitMenuItem.setDisable(false);
+                    }
+                });
+                fileMenu.getItems().add(submitMenuItem);
+            }
+
+            menuBar.getMenus().add(fileMenu);
+        }
+
         pane.setTop(menuBar);
 
         //--- Information
@@ -161,6 +179,7 @@ public class CaptureTab extends Tab {
                 Platform.runLater(() -> this.crashInformationButton.setVisible((gameState == GameStates.SHUTDOWN_CRASHED)));
             });
         }
+
 
         //---
         pane.setCenter(this.captureSessionChart.getLineChart());

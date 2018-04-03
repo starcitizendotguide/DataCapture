@@ -12,6 +12,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import org.apache.log4j.BasicConfigurator;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -170,6 +171,7 @@ public class Main extends Application {
     }
 
     public static void main(String[] args) {
+        BasicConfigurator.configure();
         launch(args);
     }
 

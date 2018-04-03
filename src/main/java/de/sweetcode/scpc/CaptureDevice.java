@@ -13,7 +13,9 @@ import org.pcap4j.packet.IpV6Packet;
 import org.pcap4j.packet.Packet;
 
 import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.UnknownHostException;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -54,7 +56,7 @@ public class CaptureDevice implements Runnable {
             networkInterface = Pcaps.getDevByAddress(address);
         } catch (PcapNativeException e) {
             e.printStackTrace();
-            Utils.popup("Exception", "An popup occured in the pcap native library. [Pcaps#getDevByAddress]", Alert.AlertType.ERROR, true);
+            Utils.popup("Exception", "An popup occurred in the pcap native library. [Pcaps#getDevByAddress]", Alert.AlertType.ERROR, true);
         }
 
         if(networkInterface == null) {
@@ -70,7 +72,7 @@ public class CaptureDevice implements Runnable {
         try {
             handle = networkInterface.openLive(SNAP_LEN, mode, TIMEOUT);
         } catch (PcapNativeException e) {
-            Utils.popup("Exception", "An popup occured in the pcap native library. [PcapNetworkInterface#openLive]", Alert.AlertType.ERROR, true);
+            Utils.popup("Exception", "An popup occurred in the pcap native library. [PcapNetworkInterface#openLive]", Alert.AlertType.ERROR, true);
             return;
         }
 
