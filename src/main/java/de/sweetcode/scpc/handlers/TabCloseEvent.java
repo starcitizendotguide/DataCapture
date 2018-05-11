@@ -22,7 +22,7 @@ public class TabCloseEvent implements EventHandler<Event> {
     @Override
     public void handle(Event event) {
 
-        if(this.captureTab.getCaptureSession().getDataPoints().size() > 0) {
+        if(this.captureTab.getCaptureSession().getDataPoints().size() > 0 && !this.captureTab.getCaptureSession().isArchived()) {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "All unsaved data will be lost.\n" +
                     "Do you really wanna close this tab now?");
             alert.setTitle("Exit");

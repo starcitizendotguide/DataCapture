@@ -116,7 +116,7 @@ public class CaptureTab extends Tab {
                 submitMenuItem.setDisable(true);
                 this.captureSession.addListener(DataPoint.class, dataPoint -> {
                     if(this.captureSession.getDataPoints().size() >= 100 && submitMenuItem.isDisable()) {
-                        submitMenuItem.setOnAction(new SubmitDataHandler(submitMenuItem, this));
+                        submitMenuItem.setOnAction(new SubmitDataHandler(this));
                         submitMenuItem.setDisable(false);
                     }
                 });
@@ -145,11 +145,18 @@ public class CaptureTab extends Tab {
 
         this.captureSession.addListener(DataPoint.class, dataPoint -> {
             Platform.runLater(() -> {
-                this.fpsLabel.setText(String.format("FPS: %d (avg.: %.2f)", dataPoint.getData(DataPoint.Types.FPS).getYValue().intValue(),
-                            this.captureSession.getDataPoints().stream().mapToDouble(e -> e.getData(DataPoint.Types.FPS).getYValue().doubleValue()).sum() / this.captureSession.getDataPoints().size())
-                        );
                 this.packagesCapturedLabel.setText(String.format("Packages Captured: %d", this.captureSession.getDataPoints().size()));
                 this.setStatusText("Capturing...", Alert.AlertType.INFORMATION);
+
+                //---
+                double percentile =this.captureSession.getDataPoints().stream().sorted((a, b) -> {
+                    double aFPS = a.getData(DataPoint.Types.FPS).getYValue().doubleValue();
+                    double bFPS = b.getData(DataPoint.Types.FPS).getYValue().doubleValue();
+                    if(aFPS < bFPS) return 1;
+                    else if(aFPS > bFPS) return -1;
+                    return 0;
+                }).mapToDouble(e -> e.getData(DataPoint.Types.FPS).getYValue().doubleValue()).toArray()[(int) (this.captureSession.getDataPoints().size() * 0.95)];
+                this.fpsLabel.setText(String.format("FPS: %.2f (95th: %.2f)", dataPoint.getData(DataPoint.Types.FPS).getYValue().doubleValue(), percentile));
             });
         });
 
@@ -168,6 +175,10 @@ public class CaptureTab extends Tab {
                         gameInformation.getVersion(),
                         gameInformation.getBranch())
             ));
+        });
+
+        this.captureSession.addListener(CaptureSession.class, captureSession -> {
+            Platform.runLater(() -> this.setText(String.format("Session - %d", this.getCaptureSession().getSessionId())));
         });
 
         //---

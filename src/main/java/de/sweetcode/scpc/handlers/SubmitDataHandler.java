@@ -18,14 +18,14 @@ import java.io.IOException;
 public class SubmitDataHandler implements EventHandler<ActionEvent> {
 
     private final static String BASE_HOST = "http://performance.starcitizen.guide";
+    //private final static String BASE_HOST = "http://star.api:8000";
+
     private final static Gson gson = new Gson();
     private final static OkHttpClient client = new OkHttpClient.Builder().build();
 
-    private final MenuItem menuItem;
     private final CaptureTab captureTab;
 
-    public SubmitDataHandler(MenuItem menuItem, CaptureTab captureTab) {
-        this.menuItem = menuItem;
+    public SubmitDataHandler(CaptureTab captureTab) {
         this.captureTab = captureTab;
     }
 

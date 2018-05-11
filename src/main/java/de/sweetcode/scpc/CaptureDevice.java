@@ -1,6 +1,7 @@
 package de.sweetcode.scpc;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import de.sweetcode.scpc.data.*;
@@ -29,6 +30,8 @@ public class CaptureDevice implements Runnable {
 
     private final Main main;
     private final String addressInput;
+
+    private final long RESERVED_SESSION_ID = 0xFFFFFFD6;
 
     /**
      * @param main The associated main class.
@@ -130,17 +133,34 @@ public class CaptureDevice implements Runnable {
 
                     //--- Session Handling
                     if(finalObject.has("sessionid")) {
-                        long sessionId = finalObject.get("sessionid").getAsLong();
+                        JsonElement sessionIdElement = finalObject.get("sessionid");
+                        long sessionId;
+                        if(sessionIdElement.getAsString().isEmpty()) {
+                            sessionId = RESERVED_SESSION_ID;
+                        } else {
+                            sessionId = sessionIdElement.getAsLong();
+                        }
 
-                        if(this.main.hasSession(sessionId)) {
+                        //--- A session with the session id exists, we can just crab the tab
+                        if (this.main.hasSession(sessionId)) {
                             captureTab = this.main.getCaptureTab(sessionId);
-                        } else if(!(this.main.hasSession(sessionId)) && !(event.equals("Game Quit"))) {
+                        }
+                        //--- NOTE: We received a packet with an empty sessionid field. We assigned the RESERVED_SESSION_ID
+                        // to this session and update it as soon as we get the real session id!
+                        else if(!(this.main.hasSession(sessionId)) && this.main.hasSession(RESERVED_SESSION_ID)) {
+                            captureTab = this.main.getCaptureTab(RESERVED_SESSION_ID);
+                            captureTab.getCaptureSession().setSessionId(sessionId);
+                            this.main.logToDebugConsole(String.format("Updated RESERVED_SESSION_ID to %d!", sessionId));
+                        }
+                        //--- We don't have this id stored yet and we are also not quitting the game -> create a new session.
+                        else if (!(this.main.hasSession(sessionId)) && !(event.equals("Game Quit"))) {
                             this.main.addCaptureSession(new CaptureSession(sessionId, false));
                             captureTab = this.main.getCaptureTab(sessionId);
                         } else {
                             //@TODO
                             throw new IllegalStateException();
                         }
+
                     } else {
                         this.main.logToDebugConsole("Waiting for packet with session id...");
                         continue;

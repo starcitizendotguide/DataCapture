@@ -17,7 +17,6 @@ public class CaptureSession {
 
     private final static ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
-
     private long sessionId;
     private final boolean isArchived;
 
@@ -105,6 +104,7 @@ public class CaptureSession {
      */
     public void setSessionId(long sessionId) {
         this.sessionId = sessionId;
+        this.notifyListeners(this);
     }
 
     public void setGPUInformation(GPUInformation gpuInformation) {
@@ -157,7 +157,7 @@ public class CaptureSession {
     }
 
     public interface Listener<T> {
-        void captured(T data );
+        void captured(T data);
     }
 
 }
