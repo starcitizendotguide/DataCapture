@@ -21,6 +21,9 @@ You can download the latest version [here](https://github.com/starcitizendotguid
 the installation of [Wireshark](https://www.wireshark.org/#download). Wireshark contains some of the necessary files that
 this tool requires to capture the data without it the program wont work. 
 
+### How To Run It
+You have to start this program as administrator in order for it to get access to the network interface.
+
 ### Features
 
  - Easy-to-use - Install the tool. Select the network interface. Done.
