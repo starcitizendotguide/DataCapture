@@ -78,6 +78,7 @@ public class DataPoint {
             public String getPacketKey() {
                 return "fps";
             }
+
         },
         PLAYERS {
             @Override
@@ -94,6 +95,7 @@ public class DataPoint {
             public String getPacketKey() {
                 return "count_ply";
             }
+
         },
         VEHICLES_TOTAL {
             @Override

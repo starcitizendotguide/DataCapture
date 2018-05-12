@@ -182,8 +182,11 @@ public class CaptureDevice implements Runnable {
                     }
 
                     //--- Heartbeat
-                    switch (event) {
-                        case "Heartbeat":
+                    boolean handled = true;
+                    switch (event.toLowerCase()) {
+
+                        //--- HEARTBEAT
+                        case "heartbeat":
                             Platform.runLater(() -> {
                                 DataPoint dataPoint = new DataPoint(finalGameState, finalCaptureTab.getCaptureSession().getDataPoints().size());
                                 for (DataPoint.Type type : DataPoint.Types.values()) {
@@ -192,6 +195,7 @@ public class CaptureDevice implements Runnable {
                                 finalCaptureTab.getCaptureSession().add(dataPoint);
                             });
                             break;
+
                         //--- BOOT: GPU DESCRIPTION
                         case "boot_gpu_desc":
 
@@ -206,14 +210,17 @@ public class CaptureDevice implements Runnable {
                             captureTab.getCaptureSession().setGPUInformation(gpuInformation);
 
                             break;
-                        case "Game Quit":
+
+                        //---
+                        case "game quit":
                             this.main.logToDebugConsole(("Game Quit -> " + payload));
                             captureTab.setStatusText("Capturing stopped", Alert.AlertType.INFORMATION);
                             break;
-                        default:
-                            this.main.logToDebugConsole("Event: " + event + " -> " + payload);
-                            break;
+
+                        default: handled = false; break;
                     }
+
+                    this.main.logToDebugConsole(String.format("%s Event: %s -> %s", (handled ? "[HANDLED]" : "[UNHANDLED]"), event, payload));
 
                 }
 

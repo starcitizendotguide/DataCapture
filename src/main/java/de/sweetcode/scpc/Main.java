@@ -13,6 +13,8 @@ import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -76,7 +78,7 @@ public class Main extends Application {
 
     public void logToDebugConsole(String message) {
         this.debugConsole.setText(String.format("%s\n%s", this.debugConsole.getText(), message));
-        System.out.println(message);
+        Logger.getLogger(Main.class).log(Level.DEBUG, message);
     }
 
     @Override
