@@ -33,5 +33,5 @@ You have to start this program as administrator in order for it to get access to
 
 ### Example
 
-![Example Image](https://screenshotscdn.firefoxusercontent.com/images/0cae144b-7b9e-4e75-8e49-32b50f6ccf83.png)
+![Example Image](https://screenshotscdn.firefoxusercontent.com/images/be0c3550-aa6c-4915-bc64-191cda127933.png)
 
