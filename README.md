@@ -13,7 +13,7 @@ The typical performance footprint on the system itself is irrelevant as it almos
 ### Do you collect any of the data?
 
 No! We do not send the data to anyone but yourself. The data never leaves your computer and is only stored in memory until
-you chose to store it on your computer's disk.
+you chose to store it on your computer's disk. However, you can submit your data to my server, so that I can create comprehensive performance statistics for Star Citizen. You can do this by clicking on "File" and then "Submit". You need to have at least captured 100 packages to be able to submit your data. I DO NOT store any personal information and there is no way to identify you or your account.
 
 ### Installation
 
