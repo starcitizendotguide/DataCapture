@@ -31,7 +31,7 @@ You have to start this program as administrator in order for it to get access to
  a new session, so you can keep all of your runs organized.
  - JSON Export - Do you wanna use the captured data anywhere else? No problem, you can output all sessions into files.
 
-### Example - 1h Play Session - PTU & Arena Commander
+### Example
 
 ![Example Image](https://screenshotscdn.firefoxusercontent.com/images/0cae144b-7b9e-4e75-8e49-32b50f6ccf83.png)
 
