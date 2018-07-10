@@ -13,7 +13,7 @@ The typical performance footprint on the system itself is irrelevant as it almos
 ### Do you collect any of the data?
 
 No! We do not send the data to anyone but yourself. The data never leaves your computer and is only stored in memory until
-you chose to store it on your computer's disk.
+you chose to store it on your computer's disk. However, you can submit your data to my server, so that I can create comprehensive performance statistics for Star Citizen. You can do this by clicking on "File" and then "Submit". You need to have at least captured 100 packages to be able to submit your data. I DO NOT store any personal information and there is no way to identify you or your account.
 
 ### Installation
 
@@ -31,7 +31,7 @@ You have to start this program as administrator in order for it to get access to
  a new session, so you can keep all of your runs organized.
  - JSON Export - Do you wanna use the captured data anywhere else? No problem, you can output all sessions into files.
 
-### Example - 1h Play Session - PTU & Arena Commander
+### Example
 
-![Example Image](https://screenshotscdn.firefoxusercontent.com/images/0cae144b-7b9e-4e75-8e49-32b50f6ccf83.png)
+![Example Image](https://screenshotscdn.firefoxusercontent.com/images/be0c3550-aa6c-4915-bc64-191cda127933.png)
 
