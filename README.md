@@ -18,7 +18,7 @@ you chose to store it on your computer's disk. However, you can submit your data
 ### Installation
 
 You can download the latest version [here](https://github.com/starcitizendotguide/DataCapture/releases). It also requires
-the installation of [Wireshark](https://www.wireshark.org/#download). Wireshark contains some of the necessary files that
+the installation of [WinPcap](https://www.winpcap.org/install/default.htm). WinPcap contains some of the necessary files that
 this tool requires to capture the data without it the program wont work. 
 
 ### How To Run It
