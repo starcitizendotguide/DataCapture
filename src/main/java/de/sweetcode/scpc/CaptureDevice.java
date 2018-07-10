@@ -86,9 +86,10 @@ public class CaptureDevice implements Runnable {
                 packet = handle.getNextPacket();
             } catch (NotOpenException e) {
                 Utils.popup("Exception", "The handle is not open.", Alert.AlertType.ERROR, false);
+                this.main.logToDebugConsole(e);
                 return;
             } catch (IllegalArgumentException ignore) {
-                this.main.logToDebugConsole(":UnexplainableError ");
+                this.main.logToDebugConsole(String.format(":UnexplainableError - %s", ignore.getMessage()));
             }
 
             if (packet == null) {

@@ -3,13 +3,11 @@ package de.sweetcode.scpc.gui;
 import de.sweetcode.scpc.Main;
 import de.sweetcode.scpc.data.*;
 import de.sweetcode.scpc.handlers.FileSaveAsActionEvent;
-import de.sweetcode.scpc.handlers.SubmitDataHandler;
+import de.sweetcode.scpc.handlers.FileTakeScreenshot;
 import de.sweetcode.scpc.handlers.TabCloseEvent;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
@@ -23,6 +21,7 @@ public class CaptureTab extends Tab {
     private final CaptureSession captureSession;
 
     private final CaptureSessionChart captureSessionChart;
+    private final HardwareSessionChart hardwareSessionChart = new HardwareSessionChart();
 
     //---
     private final Main main;
@@ -62,7 +61,7 @@ public class CaptureTab extends Tab {
         return this.captureSession;
     }
 
-    public CaptureSessionChart getCaptureSessionChart() {
+    public SessionChart getCaptureSessionChart() {
         return this.captureSessionChart;
     }
 
@@ -106,6 +105,12 @@ public class CaptureTab extends Tab {
             Menu fileMenu = new Menu("File");
 
             {
+                MenuItem screenshotMenuItem = new MenuItem("Screenshot");
+                screenshotMenuItem.setOnAction(new FileTakeScreenshot(this));
+                fileMenu.getItems().addAll(screenshotMenuItem);
+            }
+
+            {
                 MenuItem saveAsMenuItem = new MenuItem("Save As");
                 saveAsMenuItem.setOnAction(new FileSaveAsActionEvent(this));
                 fileMenu.getItems().add(saveAsMenuItem);
@@ -114,12 +119,12 @@ public class CaptureTab extends Tab {
             {
                 MenuItem submitMenuItem = new MenuItem("Submit");
                 submitMenuItem.setDisable(true);
-                this.captureSession.addListener(DataPoint.class, dataPoint -> {
+                /*this.captureSession.addListener(DataPoint.class, dataPoint -> {
                     if(this.captureSession.getDataPoints().size() >= 100 && submitMenuItem.isDisable()) {
                         submitMenuItem.setOnAction(new SubmitDataHandler(this));
                         submitMenuItem.setDisable(false);
                     }
-                });
+                });*/
                 fileMenu.getItems().add(submitMenuItem);
             }
 

@@ -80,7 +80,7 @@ public class DataPoint {
             }
 
         },
-        PLAYERS {
+        /*PLAYERS {
             @Override
             public String getName() {
                 return "Players";
@@ -96,7 +96,7 @@ public class DataPoint {
                 return "count_ply";
             }
 
-        },
+        },*/
         VEHICLES_TOTAL {
             @Override
             public String getName() {

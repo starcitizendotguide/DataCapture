@@ -28,9 +28,14 @@ import java.util.List;
 public class FileSaveAsActionEvent implements EventHandler<ActionEvent> {
 
     private final CaptureTab captureTab;
+    private final FileChooser fileChooser = new FileChooser();
 
     public FileSaveAsActionEvent(CaptureTab captureTab) {
         this.captureTab = captureTab;
+
+        this.fileChooser.setInitialFileName(String.format("session-%d.json", this.captureTab.getCaptureSession().getSessionId()));
+        this.fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JSON Files (*.json)", "*.json"));
+        this.fileChooser.setTitle("Save Captured Data");
     }
 
     @Override
@@ -41,12 +46,7 @@ public class FileSaveAsActionEvent implements EventHandler<ActionEvent> {
             return;
         }
 
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setInitialFileName(String.format("session-%d.json", this.captureTab.getCaptureSession().getSessionId()));
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JSON Files (*.json)", "*.json"));
-        fileChooser.setTitle("Save Captured Data");
-
-        File file = fileChooser.showSaveDialog(this.captureTab.getMain().getStage());
+        File file = this.fileChooser.showSaveDialog(this.captureTab.getMain().getStage());
         if(!(file == null)) {
 
             if(!(file.getName().toLowerCase().endsWith(".json"))) {
@@ -54,6 +54,7 @@ public class FileSaveAsActionEvent implements EventHandler<ActionEvent> {
                 return;
             }
 
+            this.fileChooser.setInitialDirectory(file.getParentFile());
             try {
                 FileOutputStream fileOutputStream = new FileOutputStream(file, false);
                 fileOutputStream.write(new Gson().toJson(Serializer.serialize(this.captureTab)).getBytes(Charset.forName("UTF-8")));

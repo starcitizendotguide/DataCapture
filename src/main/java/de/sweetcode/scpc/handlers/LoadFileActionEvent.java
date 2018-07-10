@@ -24,19 +24,19 @@ public class LoadFileActionEvent implements EventHandler<ActionEvent> {
     private final static Gson gson = new Gson();
 
     private final Main main;
+    private final FileChooser fileChooser = new FileChooser();
 
     public LoadFileActionEvent(Main main) {
         this.main = main;
+        this.fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JSON Files (*.json)", "*.json"));
+        this.fileChooser.setTitle("Import Captured Data");
     }
 
     @Override
     public void handle(ActionEvent event) {
 
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JSON Files (*.json)", "*.json"));
-        fileChooser.setTitle("Import Captured Data");
 
-        File file = fileChooser.showOpenDialog(this.main.getStage());
+        File file = this.fileChooser.showOpenDialog(this.main.getStage());
         if(!(file == null)) {
 
             if(!(file.getName().toLowerCase().endsWith(".json"))) {

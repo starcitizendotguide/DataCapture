@@ -6,50 +6,33 @@ import de.sweetcode.scpc.data.DataPoint;
 import javafx.collections.FXCollections;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
-import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.input.MouseButton;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 
-/**
- * The line chart representing all captured values.
- */
-public class CaptureSessionChart {
-
-    private final Map<DataPoint.Type, XYChart.Series<Number, Number>> seriesMap = new LinkedHashMap<>();
-    private BackgroundLineChart lineChart;
+public class CaptureSessionChart extends SessionChart {
 
     private final CaptureSession captureSession;
 
-    /**
-     * @param captureSession The session that the chart will display and track.
-     */
     public CaptureSessionChart(CaptureSession captureSession) {
         this.captureSession = captureSession;
-        this.lineChart = this.generateLineChart();
         this.captureSession.addListener(DataPoint.class, dataPoint -> {
             for (DataPoint.Type type : DataPoint.Types.values()) {
-                this.seriesMap.get(type).getData().add(dataPoint.getData(type));
+                this.getSeriesMap().get(type).getData().add(dataPoint.getData(type));
             }
         });
     }
 
-    /**
-     * Gives the line char.
-     * @return Returns the line chart, never null.
-     */
-    public BackgroundLineChart getLineChart() {
-        return this.lineChart;
-    }
-
+    @Override
     public void forceDraw() {
-        this.seriesMap.forEach((k, v) -> v.getData().clear());
+        this.getSeriesMap().forEach((k, v) -> v.getData().clear());
 
         this.captureSession.getDataPoints().forEach(dataPoint -> {
             for (DataPoint.Type type : DataPoint.Types.values()) {
-                this.seriesMap.get(type).getData().add(dataPoint.getData(type));
+                this.getSeriesMap().get(type).getData().add(dataPoint.getData(type));
             }
         });
     }
@@ -58,7 +41,8 @@ public class CaptureSessionChart {
      * Generates the line chart and does all of the setup.
      * @return
      */
-    private BackgroundLineChart generateLineChart() {
+    @Override
+    BackgroundLineChart generateLineChart() {
 
         final BackgroundLineChart lineChart;
         final NumberAxis xAxis = new NumberAxis();
@@ -70,7 +54,7 @@ public class CaptureSessionChart {
             XYChart.Series<Number, Number> series = new XYChart.Series<>();
             series.setName(type.getName());
             seriesList.add(series);
-            this.seriesMap.put(type, series);
+            this.getSeriesMap().put(type, series);
         }
 
         lineChart = new BackgroundLineChart(this.captureSession, xAxis, new NumberAxis(), FXCollections.observableArrayList(seriesList));

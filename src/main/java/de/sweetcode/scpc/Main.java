@@ -12,9 +12,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -78,7 +75,12 @@ public class Main extends Application {
 
     public void logToDebugConsole(String message) {
         this.debugConsole.setText(String.format("%s\n%s", this.debugConsole.getText(), message));
-        Logger.getLogger(Main.class).log(Level.DEBUG, message);
+        //Logger.getLogger(Main.class).log(Level.DEBUG, message);
+    }
+
+    public void logToDebugConsole(Exception exception) {
+        //Logger.getLogger(Main.class).log(Level.ERROR, exception.getMessage());
+        exception.printStackTrace();
     }
 
     @Override
@@ -173,7 +175,7 @@ public class Main extends Application {
     }
 
     public static void main(String[] args) {
-        BasicConfigurator.configure();
+        //BasicConfigurator.configure();
         launch(args);
     }
 
