@@ -22,7 +22,6 @@ public class CaptureTab extends Tab {
     private final CaptureSession captureSession;
 
     private final CaptureSessionChart captureSessionChart;
-    private final HardwareSessionChart hardwareSessionChart = new HardwareSessionChart();
 
     //---
     private final Main main;
@@ -123,7 +122,13 @@ public class CaptureTab extends Tab {
                 fileMenu.getItems().add(exportMenuItem);
 
                 this.captureSession.addListener(DataPoint.class, dataPoint -> {
-                    if(this.captureSession.getDataPoints().size() >= 100 && exportMenuItem.isDisable()) {
+                    long size = this.captureSession.getDataPoints().stream().filter(
+                            e -> e.getGameState() == GameStates.HANGAR ||
+                                    e.getGameState() == GameStates.PU ||
+                                    e.getGameState() == GameStates.ARENA_COMMANDER ||
+                                    e.getGameState() == GameStates.STAR_MARINE
+                    ).count();
+                    if(size >= 100 && exportMenuItem.isDisable()) {
                         exportMenuItem.setOnAction(new ExportToRedditEvent(this));
                         exportMenuItem.setDisable(false);
                     }

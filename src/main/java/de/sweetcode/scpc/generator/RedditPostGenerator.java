@@ -5,16 +5,17 @@ import com.google.gson.JsonObject;
 import de.sweetcode.scpc.data.*;
 import de.sweetcode.scpc.gui.BackgroundLineChart;
 import de.sweetcode.scpc.gui.CaptureTab;
-import okhttp3.MultipartBody;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import okhttp3.*;
 import org.apache.commons.math3.stat.StatUtils;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.util.Base64;
+import java.util.Collections;
+import java.util.stream.Stream;
+
+import static de.sweetcode.scpc.data.Serializer.serialize;
 
 
 public class RedditPostGenerator {
@@ -87,11 +88,13 @@ public class RedditPostGenerator {
             appendFPSTable(GameStates.UNKNOWN, session, builder);
         }
 
-        BufferedImage screenshot = captureTab.getCaptureSessionChart().screenshot(1920, 1080, BackgroundLineChart.BackgroundType.COLOUR);
 
+        //--- Screenshot
+        String graphLink = "Graph Image (Error)";
+
+        BufferedImage screenshot = captureTab.getCaptureSessionChart().screenshot(1920, 1080, BackgroundLineChart.BackgroundType.COLOUR);
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        try
-        {
+        try  {
             ImageIO.write(screenshot, "png", outputStream);
             String base64 = Base64.getEncoder().encodeToString(outputStream.toByteArray());
 
@@ -108,13 +111,33 @@ public class RedditPostGenerator {
             JsonObject object = gson.fromJson(response.body().string(), JsonObject.class);
 
             if(response.code() == 200 && object.has("success") && object.get("success").getAsBoolean()) {
-                builder.append(String.format("____\n[Graph Image](%s)\n", object.getAsJsonObject("data").get("link").getAsString()));
+                graphLink = String.format("[Graph Image](%s)", object.getAsJsonObject("data").get("link").getAsString());
             }
-        }
-        catch (final Exception ex)
-        {
+        } catch (final Exception ex) {
             ex.printStackTrace();
         }
+
+        //--- Submit Data
+        String jsonLink = "Full Data Set (Error)";
+        try {
+            Request request = new Request.Builder()
+                    .url("https://api.myjson.com/bins")
+                    .post(RequestBody.create(MediaType.parse("application/json; charset=utf-8"), gson.toJson(Serializer.serialize(captureTab))))
+                    .build();
+
+            Response response = client.newCall(request).execute();
+            if(response.code() == 201) {
+                JsonObject object = gson.fromJson(response.body().string(), JsonObject.class);
+                if(object.has("uri")) {
+                    jsonLink = String.format("[Full Data Set](%s)", object.get("uri").getAsString());
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        builder.append(String.format("____\n%s | %s", graphLink, jsonLink));
+
 
         return builder.toString();
 
@@ -131,12 +154,14 @@ public class RedditPostGenerator {
 
         String mean = (fps.length > 0 ? String.format("%.2fFPS", StatUtils.mean(fps)) : "N/A");
         String median = (fps.length > 0 ? String.format("%.2fFPS", StatUtils.percentile(fps, 50)) : "N/A");
+        String range = (fps.length > 0 ? String.format("[%.2f;%.2f]", StatUtils.min(fps), StatUtils.max(fps)) : "N/A");
         String percentile_95 = (fps.length > 0 ? String.format("%.2fFPS", StatUtils.percentile(fps, 50)) : "N/A");
         String percentile_99 = (fps.length > 0 ? String.format("%.2fFPS", StatUtils.percentile(fps, 99)) : "N/A");
         String percentile_999 = (fps.length > 0 ? String.format("%.2fFPS", StatUtils.percentile(fps, 99.9)) : "N/A");
 
         builder.append(String.format("|Mean|%s|\n", mean));
         builder.append(String.format("|Median|%s|\n", median));
+        builder.append(String.format("|Range|%s|\n", range));
         builder.append(String.format("|95%%|%s|\n", percentile_95));
         builder.append(String.format("|99%%|%s|\n", percentile_99));
         builder.append(String.format("|99.9%%|%s|\n", percentile_999));
