@@ -12,6 +12,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import oshi.SystemInfo;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -23,6 +24,7 @@ import java.util.concurrent.Executors;
 public class Main extends Application {
 
     public final static boolean FEATURE_CRASH_REPORT = false;
+    public static final boolean FEATURE_OSHI_HARDWARE_DETECTION = true;
 
     private final ExecutorService threadPool = Executors.newWorkStealingPool();
 
@@ -34,7 +36,15 @@ public class Main extends Application {
     private Stage stage;
     private BackgroundLineChart.BackgroundType defaultBackgroundType = BackgroundLineChart.BackgroundType.NONE;
 
-    public Main() {}
+    //---
+    private final static SystemInfo systemInfo = new SystemInfo();
+
+    public Main() {
+    }
+
+    public static SystemInfo getSystemInfo() {
+        return systemInfo;
+    }
 
     public Stage getStage() {
         return this.stage;

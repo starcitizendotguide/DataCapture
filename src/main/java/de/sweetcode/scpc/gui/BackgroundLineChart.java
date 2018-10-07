@@ -26,6 +26,10 @@ public class BackgroundLineChart extends LineChart<Number, Number> {
         this.backgroundType = backgroundType;
     }
 
+    public BackgroundType getBackgroundType() {
+        return this.backgroundType;
+    }
+
     public void redraw() {
         this.layoutPlotChildren();
     }
@@ -136,6 +140,7 @@ public class BackgroundLineChart extends LineChart<Number, Number> {
 
         }
 
+
     }
 
     private HighestValue highestYValue(int index) {
@@ -174,6 +179,7 @@ public class BackgroundLineChart extends LineChart<Number, Number> {
         }
         return secondMax;
     }
+
 
     private class HighestValue {
 

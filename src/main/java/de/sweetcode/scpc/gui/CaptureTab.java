@@ -11,6 +11,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
+import org.apache.commons.math3.stat.StatUtils;
 
 /**
  * The CaptureTab represents one CaptureSession and displays ALL data and is responsible for dealing
@@ -117,6 +118,19 @@ public class CaptureTab extends Tab {
             }
 
             {
+                MenuItem exportMenuItem = new MenuItem("Export to Reddit");
+                exportMenuItem.setDisable(true);
+                fileMenu.getItems().add(exportMenuItem);
+
+                this.captureSession.addListener(DataPoint.class, dataPoint -> {
+                    if(this.captureSession.getDataPoints().size() >= 100 && exportMenuItem.isDisable()) {
+                        exportMenuItem.setOnAction(new ExportToRedditEvent(this));
+                        exportMenuItem.setDisable(false);
+                    }
+                });
+            }
+
+            {
                 MenuItem submitMenuItem = new MenuItem("Submit");
                 submitMenuItem.setDisable(true);
                 /*this.captureSession.addListener(DataPoint.class, dataPoint -> {
@@ -154,17 +168,11 @@ public class CaptureTab extends Tab {
                 this.setStatusText("Capturing...", Alert.AlertType.INFORMATION);
 
                 //---
-                double[] percentile =this.captureSession.getDataPoints().stream().sorted((a, b) -> {
-                    double aFPS = a.getData(DataPoint.Types.FPS).getYValue().doubleValue();
-                    double bFPS = b.getData(DataPoint.Types.FPS).getYValue().doubleValue();
-                    if(aFPS < bFPS) return 1;
-                    else if(aFPS > bFPS) return -1;
-                    return 0;
-                }).mapToDouble(e -> e.getData(DataPoint.Types.FPS).getYValue().doubleValue()).toArray();
-                final double PERCENTILE_50 = percentile[(int) (this.captureSession.getDataPoints().size() * 0.50)];
-                final double PERCENTILE_95 = percentile[(int) (this.captureSession.getDataPoints().size() * 0.95)];
-                final double PERCENTILE_99 = percentile[(int) (this.captureSession.getDataPoints().size() * 0.99)];
-                this.fpsLabel.setText(String.format("FPS: %.2f (%.2f [50th]| %.2f [95th] | %.2f [99th])", dataPoint.getData(DataPoint.Types.FPS).getYValue().doubleValue(), PERCENTILE_50, PERCENTILE_95,  PERCENTILE_99));
+                double[] fps = this.captureSession.getDataPoints().stream().mapToDouble(
+                        e -> e.getData(DataPoint.Types.FPS).getYValue().doubleValue()
+                ).toArray();
+
+                this.fpsLabel.setText(String.format("FPS: %.2f (%.2f [50th]| %.2f [95th] | %.2f [99th])", dataPoint.getData(DataPoint.Types.FPS).getYValue().doubleValue(), StatUtils.percentile(fps, 50), StatUtils.percentile(fps, 95),  StatUtils.percentile(fps, 99)));
             });
         });
 

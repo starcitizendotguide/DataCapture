@@ -12,7 +12,7 @@ public class Serializer {
 
     private Serializer() {}
 
-    public final static JsonObject serialize(CaptureTab captureTab) {
+    public static JsonObject serialize(CaptureTab captureTab) {
         JsonObject root = new JsonObject();
 
         //--- Data Points
@@ -38,6 +38,30 @@ public class Serializer {
 
         {
             gpuInformation.getData().forEach((k, v) -> gpuObject.addProperty(k.getSerializationKey(), v));
+        }
+
+        //--- CPU Information
+        JsonObject cpuObject = new JsonObject();
+
+        if(Main.FEATURE_OSHI_HARDWARE_DETECTION) {
+            CPUInformation cpuInformation = captureTab.getCaptureSession().getCPUInformation();
+            cpuInformation.getData().forEach((k, v) -> cpuObject.addProperty(k.getSerializationKey(), v));
+        }
+
+        //--- Disk Information
+        JsonObject diskObject = new JsonObject();
+
+        if(Main.FEATURE_OSHI_HARDWARE_DETECTION) {
+            DiskInformation diskInformation = captureTab.getCaptureSession().getDiskInformation();
+            diskInformation.getData().forEach((k, v) -> diskObject.addProperty(k.getSerializationKey(), v));
+        }
+
+        //--- OS Information
+        JsonObject osObject = new JsonObject();
+
+        if(Main.FEATURE_OSHI_HARDWARE_DETECTION) {
+            OSInformation osInformation = captureTab.getCaptureSession().getOSInformation();
+            osInformation.getData().forEach((k, v) -> osObject.addProperty(k.getSerializationKey(), v));
         }
 
         //--- Game Information
@@ -69,6 +93,9 @@ public class Serializer {
         root.addProperty("sessionId", captureTab.getCaptureSession().getSessionId());
         root.add("game", gameInformationObject);
         root.add("gpu", gpuObject);
+        root.add("cpu", cpuObject);
+        root.add("disk", diskObject);
+        root.add("os", osObject);
         root.add("dataPoints", dataPointsArray);
         if(Main.FEATURE_CRASH_REPORT) {
             root.add("crashReport", crashInformationObject);

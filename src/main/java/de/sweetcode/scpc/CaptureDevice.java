@@ -14,9 +14,7 @@ import org.pcap4j.packet.IpV6Packet;
 import org.pcap4j.packet.Packet;
 
 import java.net.InetAddress;
-import java.net.NetworkInterface;
 import java.net.UnknownHostException;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -199,8 +197,7 @@ public class CaptureDevice implements Runnable {
 
                         //--- BOOT: GPU DESCRIPTION
                         case "boot_gpu_desc":
-
-                            GPUInformation gpuInformation = new GPUInformation();
+                            GPUInformation gpuInformation = captureTab.getCaptureSession().getGPUInformation();
                             for (DataPoint.Type type : GPUInformation.Types.values()) {
                                 if (finalObject.has(type.getPacketKey())) {
                                     gpuInformation.add(type, finalObject.get(type.getPacketKey()).getAsString());
@@ -208,8 +205,6 @@ public class CaptureDevice implements Runnable {
                                     this.main.logToDebugConsole(String.format("boot_gpu_desc is missing '%s'", type.getPacketKey()));
                                 }
                             }
-                            captureTab.getCaptureSession().setGPUInformation(gpuInformation);
-
                             break;
 
                         //---

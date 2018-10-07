@@ -1,5 +1,8 @@
 package de.sweetcode.scpc.data;
 
+import de.sweetcode.scpc.Main;
+import oshi.hardware.CentralProcessor;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -25,26 +28,60 @@ public class CPUInformation {
         this.data.put(type, value);
     }
 
+    public void extractData() {
+        CentralProcessor processor = Main.getSystemInfo().getHardware().getProcessor();
+        {
+            String value = processor.getName();
+            if(value != null && !value.isEmpty()) {
+                this.add(Types.CPU_NAME, value);
+            }
+        }
+        {
+            String value = processor.getVendor();
+            if(value != null && !value.isEmpty()) {
+                this.add(Types.CPU_VENOR_NAME, value);
+            }
+        }
+        {
+            long value = processor.getVendorFreq();
+            if(value > 0) {
+                this.add(Types.CPU_CORE_CLOCK, Double.toString(processor.getVendorFreq() * 1e-9));
+            }
+        }
+        {
+            int value = processor.getPhysicalProcessorCount();
+            if(value > 0) {
+                this.add(Types.CPU_CORE_PHYSICAL_COUNT, Integer.toString(processor.getPhysicalProcessorCount()));
+            }
+        }
+        {
+            int value = processor.getLogicalProcessorCount();
+            if(value > 0) {
+                this.add(CPUInformation.Types.CPU_CORE_LOGICAL_COUNT, Integer.toString(processor.getLogicalProcessorCount()));
+            }
+        }
+    }
+
     public enum Types implements DataPoint.Type {
 
-        GPU_NAME {
+        CPU_NAME {
             @Override
             public String getName() {
-                return "GPU Name";
+                return "CPU Name";
             }
 
             @Override
             public String getSerializationKey() {
-                return "gpu_name";
+                return "cpu_name";
             }
 
             @Override
             public String getPacketKey() {
-                return "gpuname";
+                throw new IllegalStateException();
             }
 
         },
-        GPU_VENOR_NAME {
+        CPU_VENOR_NAME {
             @Override
             public String getName() {
                 return "Vendor Name";
@@ -52,79 +89,15 @@ public class CPUInformation {
 
             @Override
             public String getSerializationKey() {
-                return "gpu_vendor_name";
+                return "cpu_vendor_name";
             }
 
             @Override
             public String getPacketKey() {
-                return "VendorName";
+                throw new IllegalStateException();
             }
         },
-        GPU_COMPUTE_CORE_COUNT {
-            @Override
-            public String getName() {
-                return "Compute Core Count";
-            }
-
-            @Override
-            public String getSerializationKey() {
-                return "gpu_compute_core_count";
-            }
-
-            @Override
-            public String getPacketKey() {
-                return "GPU_Compute_Core_Count";
-            }
-        },
-        GPU_MEMORY_DEDICATED_PER_GPU {
-            @Override
-            public String getName() {
-                return "Memory (Dedicated) per GPU";
-            }
-
-            @Override
-            public String getSerializationKey() {
-                return "gpu_memory_dedicated_per_gpu";
-            }
-
-            @Override
-            public String getPacketKey() {
-                return "gmem_mb_ded_per_gpu";
-            }
-        },
-        GPU_MEMORY_DEDICATED {
-            @Override
-            public String getName() {
-                return "Memory (Dedicated)";
-            }
-
-            @Override
-            public String getSerializationKey() {
-                return "gpu_memory_dedicated";
-            }
-
-            @Override
-            public String getPacketKey() {
-                return "gmem_mb_ded";
-            }
-        },
-        GPU_TERAFLOPS {
-            @Override
-            public String getName() {
-                return "Teraflops";
-            }
-
-            @Override
-            public String getSerializationKey() {
-                return "gpu_teraflops";
-            }
-
-            @Override
-            public String getPacketKey() {
-                return "GPU_Teraflops";
-            }
-        },
-        GPU_CORE_CLOCK {
+        CPU_CORE_CLOCK {
             @Override
             public String getName() {
                 return "Core Clock";
@@ -132,28 +105,44 @@ public class CPUInformation {
 
             @Override
             public String getSerializationKey() {
-                return "gpu_core_clock";
+                return "cpu_core_clock";
             }
 
             @Override
             public String getPacketKey() {
-                return "GPU_Core_Clock_MHz";
+                throw new IllegalStateException();
             }
         },
-        GPU_MEMORY_CLOCK {
+        CPU_CORE_PHYSICAL_COUNT {
             @Override
             public String getName() {
-                return "Memory Clock";
+                return "Physical Core Count";
             }
 
             @Override
             public String getSerializationKey() {
-                return "gpu_memory_clock";
+                return "cpu_core_physical_count";
             }
 
             @Override
             public String getPacketKey() {
-                return "GPU_Memory_Clock_MHz";
+                throw new IllegalStateException();
+            }
+        },
+        CPU_CORE_LOGICAL_COUNT {
+            @Override
+            public String getName() {
+                return "Logical Core Count";
+            }
+
+            @Override
+            public String getSerializationKey() {
+                return "cpu_core_logical_count";
+            }
+
+            @Override
+            public String getPacketKey() {
+                throw new IllegalStateException();
             }
         };
     }

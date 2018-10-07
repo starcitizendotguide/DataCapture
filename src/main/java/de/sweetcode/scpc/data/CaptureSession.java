@@ -4,7 +4,10 @@ import de.sweetcode.scpc.Main;
 import de.sweetcode.scpc.crash.CrashDetector;
 import de.sweetcode.scpc.crash.CrashReport;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -21,6 +24,10 @@ public class CaptureSession {
     private final boolean isArchived;
 
     private GPUInformation gpuInformation = new GPUInformation();
+    private CPUInformation cpuInformation = new CPUInformation();
+    private DiskInformation diskInformation = new DiskInformation();
+    private OSInformation osInformation = new OSInformation();
+
     private GameInformation gameInformation = new GameInformation("", "");
     private CrashReport crashReport = new CrashReport();
 
@@ -61,6 +68,12 @@ public class CaptureSession {
                 });
             }
         }
+
+        if(Main.FEATURE_OSHI_HARDWARE_DETECTION && !isArchived) {
+            this.cpuInformation.extractData();
+            this.diskInformation.extractData();
+            this.osInformation.extractData();
+        }
     }
 
     /**
@@ -94,6 +107,18 @@ public class CaptureSession {
         return this.gpuInformation;
     }
 
+    public CPUInformation getCPUInformation() {
+        return this.cpuInformation;
+    }
+
+    public DiskInformation getDiskInformation() {
+        return this.diskInformation;
+    }
+
+    public OSInformation getOSInformation() {
+        return this.osInformation;
+    }
+
     public CrashReport getCrashReport() {
         return this.crashReport;
     }
@@ -112,9 +137,24 @@ public class CaptureSession {
         this.notifyListeners(gpuInformation);
     }
 
+    public void setCPUInformation(CPUInformation cpuInformation) {
+        this.cpuInformation = cpuInformation;
+        this.notifyListeners(gpuInformation);
+    }
+
+    public void setDiskInformation(DiskInformation diskInformation) {
+        this.diskInformation = diskInformation;
+        this.notifyListeners(diskInformation);
+    }
+
     public void setGameInformation(GameInformation gameInformation) {
         this.gameInformation = gameInformation;
         this.notifyListeners(gameInformation);
+    }
+
+    public void setOSInformation(OSInformation osInformation) {
+        this.osInformation = osInformation;
+        this.notifyListeners(osInformation);
     }
 
     public void setCrashReport(CrashReport crashReport) {

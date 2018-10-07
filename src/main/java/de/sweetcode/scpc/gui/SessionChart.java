@@ -1,30 +1,14 @@
 package de.sweetcode.scpc.gui;
 
-import com.sun.javafx.charts.Legend;
-import de.sweetcode.scpc.data.CaptureSession;
 import de.sweetcode.scpc.data.DataPoint;
-import javafx.collections.FXCollections;
 import javafx.embed.swing.SwingFXUtils;
-import javafx.scene.Cursor;
-import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
-import javafx.scene.SnapshotResult;
-import javafx.scene.chart.LineChart;
-import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.image.WritableImage;
-import javafx.scene.input.MouseButton;
-import javafx.util.Callback;
 
-import javax.imageio.ImageIO;
-import javax.imageio.stream.FileImageOutputStream;
 import java.awt.image.BufferedImage;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * The line chart representing all captured values.
@@ -34,18 +18,25 @@ public abstract class SessionChart {
     private final Map<DataPoint.Type, XYChart.Series<Number, Number>> seriesMap = new LinkedHashMap<>();
     private BackgroundLineChart lineChart;
 
-    public SessionChart() {
-        this.lineChart = this.generateLineChart();
+    public SessionChart() { }
+
+    public void setLineChart(BackgroundLineChart lineChart) {
+        this.lineChart = lineChart;
     }
 
     public Map<DataPoint.Type, XYChart.Series<Number, Number>> getSeriesMap() {
         return seriesMap;
     }
 
-    public BufferedImage screenshot(int screenshotWidth, int screenshotHeight) {
+    public BufferedImage screenshot(int screenshotWidth, int screenshotHeight, BackgroundLineChart.BackgroundType backgroundType) {
 
         double width = this.lineChart.getWidth();
         double height = this.lineChart.getHeight();
+
+        BackgroundLineChart.BackgroundType oldBackgroundType = this.lineChart.getBackgroundType();
+        if(backgroundType != null) {
+            this.lineChart.setBackgroundType(backgroundType);
+        }
 
         this.lineChart.setMinSize(screenshotWidth, screenshotHeight);
         this.lineChart.redraw();
@@ -55,6 +46,7 @@ public abstract class SessionChart {
 
         this.lineChart.setMinSize(0, 0);
         this.lineChart.setPrefSize(width, height);
+        this.lineChart.setBackgroundType(oldBackgroundType);
         this.lineChart.redraw();
 
         return SwingFXUtils.fromFXImage(writableImage, null);

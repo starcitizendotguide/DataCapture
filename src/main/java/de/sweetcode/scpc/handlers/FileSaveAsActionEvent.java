@@ -1,14 +1,7 @@
 package de.sweetcode.scpc.handlers;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import de.sweetcode.scpc.Main;
-import de.sweetcode.scpc.crash.CrashReport;
-import de.sweetcode.scpc.data.DataPoint;
 import de.sweetcode.scpc.Utils;
-import de.sweetcode.scpc.data.GPUInformation;
-import de.sweetcode.scpc.data.GameInformation;
 import de.sweetcode.scpc.data.Serializer;
 import de.sweetcode.scpc.gui.CaptureTab;
 import javafx.event.ActionEvent;
@@ -20,7 +13,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.List;
 
 /**
  * Called when the user wants to save a session to a file.

@@ -1,18 +1,22 @@
 package de.sweetcode.scpc.handlers;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import de.sweetcode.scpc.Main;
+import de.sweetcode.scpc.Utils;
 import de.sweetcode.scpc.crash.CrashDataType;
 import de.sweetcode.scpc.crash.CrashDataTypes;
 import de.sweetcode.scpc.crash.CrashReport;
 import de.sweetcode.scpc.data.*;
-import de.sweetcode.scpc.Main;
-import de.sweetcode.scpc.Utils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
 import javafx.stage.FileChooser;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 
@@ -108,6 +112,42 @@ public class LoadFileActionEvent implements EventHandler<ActionEvent> {
                     }
                 }
                 captureSession.setGPUInformation(gpuInformation);
+
+                //--- CPU
+                CPUInformation cpuInformation = new CPUInformation();
+                if(root.has("cpu")) {
+                    JsonObject cpuObject = root.getAsJsonObject("cpu");
+                    for (DataPoint.Type type : CPUInformation.Types.values()) {
+                        if (cpuObject.has(type.getSerializationKey())) {
+                            cpuInformation.add(type, cpuObject.get(type.getSerializationKey()).getAsString());
+                        }
+                    }
+                }
+                captureSession.setCPUInformation(cpuInformation);
+
+                //--- Disk
+                DiskInformation diskInformation = new DiskInformation();
+                if(root.has("disk")) {
+                    JsonObject diskObject = root.getAsJsonObject("disk");
+                    for (DataPoint.Type type : DiskInformation.Types.values()) {
+                        if (diskObject.has(type.getSerializationKey())) {
+                            diskInformation.add(type, diskObject.get(type.getSerializationKey()).getAsString());
+                        }
+                    }
+                }
+                captureSession.setDiskInformation(diskInformation);
+
+                //--- OS
+                OSInformation osInformation = new OSInformation();
+                if(root.has("os")) {
+                    JsonObject osObject = root.getAsJsonObject("os");
+                    for (DataPoint.Type type : OSInformation.Types.values()) {
+                        if (osObject.has(type.getSerializationKey())) {
+                            osInformation.add(type, osObject.get(type.getSerializationKey()).getAsString());
+                        }
+                    }
+                }
+                captureSession.setOSInformation(osInformation);
 
                 //--- Game Information
                 if(root.has("game")) {

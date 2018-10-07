@@ -137,6 +137,12 @@ public enum GameStates implements GameState {
         }
     },
     HANGAR {
+
+        private final Image image = new Image("ha.jpg");
+        private final LinearGradient linearGrad = new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE,
+                new Stop(0.1f, Color.rgb(72, 85, 99, 1)),
+                new Stop(1.0f, Color.rgb(41, 50, 60, 1)));
+
         @Override
         public String getName() {
             return "Hangar";
@@ -144,7 +150,7 @@ public enum GameStates implements GameState {
 
         @Override
         public Image getBackground() {
-            return null;
+            return image;
         }
 
         @Override
@@ -154,7 +160,7 @@ public enum GameStates implements GameState {
 
         @Override
         public LinearGradient getBackgroundGradient() {
-            return null;
+            return linearGrad;
         }
     },
     SHUTDOWN_CRASHED {

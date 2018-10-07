@@ -24,6 +24,7 @@ public class CaptureSessionChart extends SessionChart {
                 this.getSeriesMap().get(type).getData().add(dataPoint.getData(type));
             }
         });
+        this.setLineChart(this.generateLineChart());
     }
 
     @Override
