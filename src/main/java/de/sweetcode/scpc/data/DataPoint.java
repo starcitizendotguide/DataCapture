@@ -161,6 +161,22 @@ public class DataPoint {
                 return null;
             }
 
+        },
+        CPU_USAGE {
+            @Override
+            public String getName() {
+                return "CPU Usage";
+            }
+
+            @Override
+            public String getSerializationKey() {
+                return "hw_cpu_usage";
+            }
+
+            @Override
+            public String getPacketKey() {
+                return null;
+            }
         };
 
     }

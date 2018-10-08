@@ -3,8 +3,6 @@ package de.sweetcode.scpc.data;
 import de.sweetcode.scpc.Main;
 import oshi.hardware.HWDiskStore;
 import oshi.hardware.HWPartition;
-import oshi.software.os.OSProcess;
-import oshi.software.os.OperatingSystem;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -12,17 +10,17 @@ import java.util.Map;
 
 public class DiskInformation {
 
+    private final CaptureSession captureSession;
     private Map<DataPoint.Type, String> data = new LinkedHashMap<>();
-    private OSProcess process = null;
 
-    public DiskInformation() {
+    private boolean hasExtracted = false;
+
+
+    public DiskInformation(CaptureSession captureSession) {
+        this.captureSession = captureSession;
         for(DataPoint.Type type : Types.values()) {
             this.data.put(type, "N/A");
         }
-    }
-
-    public OSProcess getProcess() {
-        return this.process;
     }
 
     public Map<DataPoint.Type, String> getData() {
@@ -38,6 +36,9 @@ public class DiskInformation {
     }
 
     public void extractData() {
+
+        if (hasExtracted) return;
+
         HWDiskStore[] diskStores = Main.getSystemInfo().getHardware().getDiskStores();
         Map<String, HWDiskStore> partitions = new HashMap<>();
         for(HWDiskStore disk : diskStores) {
@@ -49,11 +50,9 @@ public class DiskInformation {
             }
         }
 
+        if (this.captureSession.getProcess() != null) {
 
-        this.updateProcess();
-        if (this.process != null) {
-
-            String[] pathSplit = process.getPath().split(":\\\\");
+            String[] pathSplit = this.captureSession.getProcess().getPath().split(":\\\\");
 
             if(pathSplit.length > 0) {
                 final String mount = pathSplit[0];
@@ -62,6 +61,7 @@ public class DiskInformation {
                 if(disk != null) {
                     String value = disk.getModel();
                     if(value != null && !value.isEmpty()) {
+                        hasExtracted = true;
                         this.add(Types.DISK_NAME, value);
                     }
                 }
@@ -70,14 +70,8 @@ public class DiskInformation {
 
     }
 
-    public void updateProcess() {
-        OSProcess[] processes = Main.getSystemInfo().getOperatingSystem().getProcesses(Integer.MAX_VALUE, OperatingSystem.ProcessSort.CPU);
-        for(OSProcess process : processes) {
-            if(process.getName().equalsIgnoreCase("StarCitizen") || process.getName().equalsIgnoreCase("starcitizen.exe")) {
-                this.process = process;
-                break;
-            }
-        }
+    public boolean hasExtracted() {
+        return this.hasExtracted;
     }
 
     public enum Types implements DataPoint.Type {

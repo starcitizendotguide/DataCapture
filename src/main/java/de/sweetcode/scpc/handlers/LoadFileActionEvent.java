@@ -128,7 +128,7 @@ public class LoadFileActionEvent implements EventHandler<ActionEvent> {
                 captureSession.setCPUInformation(cpuInformation);
 
                 //--- Disk
-                DiskInformation diskInformation = new DiskInformation();
+                DiskInformation diskInformation = new DiskInformation(captureSession);
                 if(root.has("disk")) {
                     JsonObject diskObject = root.getAsJsonObject("disk");
                     for (DataPoint.Type type : DiskInformation.Types.values()) {

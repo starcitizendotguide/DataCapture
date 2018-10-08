@@ -10,6 +10,8 @@ public class CPUInformation {
 
     private Map<DataPoint.Type, String> data = new LinkedHashMap<>();
 
+    private boolean hasExtracted = false;
+
     public CPUInformation() {
         for(DataPoint.Type type : Types.values()) {
             this.data.put(type, "N/A");
@@ -29,11 +31,15 @@ public class CPUInformation {
     }
 
     public void extractData() {
+
+        if(hasExtracted) return;
+
         CentralProcessor processor = Main.getSystemInfo().getHardware().getProcessor();
         {
             String value = processor.getName();
             if(value != null && !value.isEmpty()) {
                 this.add(Types.CPU_NAME, value);
+                hasExtracted = true;
             }
         }
         {

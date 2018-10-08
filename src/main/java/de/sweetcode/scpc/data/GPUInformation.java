@@ -1,11 +1,15 @@
 package de.sweetcode.scpc.data;
 
+import de.sweetcode.scpc.Main;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class GPUInformation {
 
     private Map<DataPoint.Type, String> data = new LinkedHashMap<>();
+
+    private boolean hasExtracted = false;
 
     public GPUInformation() {
         for(DataPoint.Type type : Types.values()) {
@@ -24,6 +28,15 @@ public class GPUInformation {
     public void add(DataPoint.Type type, String value) {
         this.data.put(type, value);
     }
+
+    public boolean hasExtracted() {
+        return this.hasExtracted;
+    }
+
+    public void setHasExtracted(boolean hasExtracted) {
+        this.hasExtracted = hasExtracted;
+    }
+
 
     public enum Types implements DataPoint.Type {
 

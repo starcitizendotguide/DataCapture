@@ -12,6 +12,7 @@ import org.pcap4j.core.*;
 import org.pcap4j.packet.IpV4Packet;
 import org.pcap4j.packet.IpV6Packet;
 import org.pcap4j.packet.Packet;
+import oshi.hardware.CentralProcessor;
 import oshi.software.os.OSProcess;
 
 import java.net.InetAddress;
@@ -188,7 +189,8 @@ public class CaptureDevice implements Runnable {
                         //--- HEARTBEAT
                         case "heartbeat":
                             Platform.runLater(() -> {
-                                final int id = finalCaptureTab.getCaptureSession().getDataPoints().size();
+                                CaptureSession captureSession = finalCaptureTab.getCaptureSession();
+                                final int id = captureSession.getDataPoints().size();
                                 DataPoint dataPoint = new DataPoint(finalGameState, id);
                                 for (DataPoint.Type type : DataPoint.Types.values()) {
                                     if (type.isInPacket()) {
@@ -197,10 +199,35 @@ public class CaptureDevice implements Runnable {
                                 }
 
                                 if(Main.FEATURE_OSHI_HARDWARE_DETECTION) {
-                                    finalCaptureTab.getCaptureSession().getDiskInformation().updateProcess();
-                                    OSProcess process = finalCaptureTab.getCaptureSession().getDiskInformation().getProcess();
+                                    captureSession.getCPUInformation().extractData();
+                                    captureSession.getDiskInformation().extractData();
+                                    captureSession.updateProcess();
+
+                                    OSProcess process = captureSession.getProcess();
                                     if(process != null) {
+                                        //--- Memory Usage
                                         dataPoint.add(DataPoint.Types.MEMORY_USAGE, process.getResidentSetSize() * 1e-9);
+
+                                        //--- CPU Usage
+                                        CentralProcessor cpu = Main.getSystemInfo().getHardware().getProcessor();
+                                        if(cpu != null) {
+                                            int cores = cpu.getLogicalProcessorCount();
+
+                                            if(cores != 0) {
+                                                long currentCPUTime = process.getKernelTime() + process.getUserTime();
+                                                long lastCheckTime = System.currentTimeMillis();
+
+                                                if(captureSession.getDeltaCPUTime() != -1) {
+                                                    long timeDelta = currentCPUTime - captureSession.getDeltaCPUTime();
+                                                    dataPoint.add(DataPoint.Types.CPU_USAGE, (
+                                                            (100D * ((double)timeDelta / (lastCheckTime - captureSession.getLastCPUCheckTime()))) / cores
+                                                        ));
+                                                    captureSession.setLastCPUCheckTime(lastCheckTime);
+                                                }
+                                                captureSession.setDeltaCPUTime(currentCPUTime);
+
+                                            }
+                                        }
                                     }
                                 }
 
@@ -214,6 +241,7 @@ public class CaptureDevice implements Runnable {
                             for (DataPoint.Type type : GPUInformation.Types.values()) {
                                 if (finalObject.has(type.getPacketKey())) {
                                     gpuInformation.add(type, finalObject.get(type.getPacketKey()).getAsString());
+                                    gpuInformation.setHasExtracted(true);
                                 } else {
                                     this.main.logToDebugConsole(String.format("boot_gpu_desc is missing '%s'", type.getPacketKey()));
                                 }

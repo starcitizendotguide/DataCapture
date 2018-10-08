@@ -147,38 +147,51 @@ public class RedditPostGenerator {
         double[] memory_usage = session.getDataPoints().stream().filter(e -> e.getGameState() == gameState).mapToDouble(
                 e -> e.getData(DataPoint.Types.MEMORY_USAGE).getYValue().doubleValue()
         ).toArray();
+        double[] cpu_usage = session.getDataPoints().stream().filter(e -> e.getGameState() == gameState).mapToDouble(
+                e -> e.getData(DataPoint.Types.CPU_USAGE).getYValue().doubleValue()
+        ).toArray();
+
+        //--- Ignore empty data sets
+        if(fps.length == 0 && memory_usage.length == 0 && cpu_usage.length == 0) return;
 
         builder.append("\n");
-        builder.append(String.format("| %s (%d DP) | FPS  | Memory Usage |\n", gameState.getName(), fps.length));
-        builder.append("|:-----------|:------------:|:------------:|\n");
+        builder.append(String.format("| %s (%d DP) | FPS  | Memory | CPU|\n", gameState.getName(), fps.length));
+        builder.append("|:-----------|:------------:|:------------:|:------------:|\n");
 
-        builder.append(String.format("|Mean|%s|%s|\n",
+        builder.append(String.format("|Mean|%s|%s|%s|\n",
                 (fps.length > 0 ? String.format("%.2fFPS", StatUtils.mean(fps)) : "N/A"),
-                (memory_usage.length > 0 ? String.format("%.2fGB", StatUtils.mean(memory_usage)) : "N/A")
+                (memory_usage.length > 0 ? String.format("%.2fGB", StatUtils.mean(memory_usage)) : "N/A"),
+                (cpu_usage.length > 0 ? String.format("%.2f%%", StatUtils.mean(cpu_usage)) : "N/A")
         ));
-        builder.append(String.format("|Median|%s|%s|\n",
+        builder.append(String.format("|Median|%s|%s|%s|\n",
                 (fps.length > 0 ? String.format("%.2fFPS", StatUtils.percentile(fps, 50)) : "N/A"),
-                (memory_usage.length > 0 ? String.format("%.2fGB", StatUtils.percentile(memory_usage, 50)) : "N/A")
+                (memory_usage.length > 0 ? String.format("%.2fGB", StatUtils.percentile(memory_usage, 50)) : "N/A"),
+                (cpu_usage.length > 0 ? String.format("%.2f%%", StatUtils.percentile(cpu_usage, 50)) : "N/A")
         ));
-        builder.append(String.format("|Range|%s|%s|\n",
+        builder.append(String.format("|Range|%s|%s|%s|\n",
                 (fps.length > 0 ? String.format("[%.2f;%.2f]", StatUtils.min(fps), StatUtils.max(fps)) : "N/A"),
-                (memory_usage.length > 0 ? String.format("[%.2f;%.2f]", StatUtils.min(memory_usage), StatUtils.max(memory_usage)) : "N/A")
+                (memory_usage.length > 0 ? String.format("[%.2f;%.2f]", StatUtils.min(memory_usage), StatUtils.max(memory_usage)) : "N/A"),
+                (cpu_usage.length > 0 ? String.format("[%.2f;%.2f]", StatUtils.min(cpu_usage), StatUtils.max(cpu_usage)) : "N/A")
         ));
-        builder.append(String.format("|95%%|%s|%s|\n",
+        builder.append(String.format("|95%%|%s|%s|%s|\n",
                 (fps.length > 0 ? String.format("%.2fFPS", StatUtils.percentile(fps, 5)) : "N/A"),
-                (memory_usage.length > 0 ? String.format("%.2fGB", StatUtils.percentile(memory_usage, 5)) : "N/A")
+                (memory_usage.length > 0 ? String.format("%.2fGB", StatUtils.percentile(memory_usage, 5)) : "N/A"),
+                (cpu_usage.length > 0 ? String.format("%.2f%%", StatUtils.percentile(memory_usage, 5)) : "N/A")
         ));
-        builder.append(String.format("|93%%|%s|%s|\n",
+        builder.append(String.format("|93%%|%s|%s|%s|\n",
                 (fps.length > 0 ? String.format("%.2fFPS", StatUtils.percentile(fps, 3)) : "N/A"),
-                (memory_usage.length > 0 ? String.format("%.2fGB", StatUtils.percentile(memory_usage, 3)) : "N/A")
+                (memory_usage.length > 0 ? String.format("%.2fGB", StatUtils.percentile(memory_usage, 3)) : "N/A"),
+                (cpu_usage.length > 0 ? String.format("%.2f%%", StatUtils.percentile(memory_usage, 3)) : "N/A")
         ));
-        builder.append(String.format("|99%%|%s|%s|\n",
+        builder.append(String.format("|99%%|%s|%s|%s|\n",
                 (fps.length > 0 ? String.format("%.2fFPS", StatUtils.percentile(fps, 1)) : "N/A"),
-                (memory_usage.length > 0 ? String.format("%.2fGB", StatUtils.percentile(memory_usage, 1)) : "N/A")
+                (memory_usage.length > 0 ? String.format("%.2fGB", StatUtils.percentile(memory_usage, 1)) : "N/A"),
+                (cpu_usage.length > 0 ? String.format("%.2f%%", StatUtils.percentile(memory_usage, 1)) : "N/A")
         ));
-        builder.append(String.format("|99.9%%|%s|%s|\n",
+        builder.append(String.format("|99.9%%|%s|%s|%s|\n",
                 (fps.length > 0 ? String.format("%.2fFPS", StatUtils.percentile(fps, 0.1)) : "N/A"),
-                (memory_usage.length > 0 ? String.format("%.2fGB", StatUtils.percentile(memory_usage, 0.1)) : "N/A")
+                (memory_usage.length > 0 ? String.format("%.2fGB", StatUtils.percentile(memory_usage, 0.1)) : "N/A"),
+                (cpu_usage.length > 0 ? String.format("%.2f%%", StatUtils.percentile(memory_usage, 0.1)) : "N/A")
         ));
     }
 

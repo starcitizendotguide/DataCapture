@@ -3,6 +3,8 @@ package de.sweetcode.scpc.data;
 import de.sweetcode.scpc.Main;
 import de.sweetcode.scpc.crash.CrashDetector;
 import de.sweetcode.scpc.crash.CrashReport;
+import oshi.software.os.OSProcess;
+import oshi.software.os.OperatingSystem;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -25,7 +27,7 @@ public class CaptureSession {
 
     private GPUInformation gpuInformation = new GPUInformation();
     private CPUInformation cpuInformation = new CPUInformation();
-    private DiskInformation diskInformation = new DiskInformation();
+    private DiskInformation diskInformation = new DiskInformation(this);
     private OSInformation osInformation = new OSInformation();
 
     private GameInformation gameInformation = new GameInformation("", "");
@@ -37,6 +39,11 @@ public class CaptureSession {
 
     private CrashDetector crashDetector = new CrashDetector();
     private ScheduledFuture<?> scheduledTask;
+
+    //--- Hardware
+    private OSProcess process = null;
+    private long deltaCPUTime = -1;
+    private long lastCPUCheckTime = 0;
 
     /**
      * Creates a CaptureSession with the default id (-1) & archive.
@@ -84,6 +91,18 @@ public class CaptureSession {
         return this.sessionId;
     }
 
+    public OSProcess getProcess() {
+        return this.process;
+    }
+
+    public long getDeltaCPUTime() {
+        return this.deltaCPUTime;
+    }
+
+    public long getLastCPUCheckTime() {
+        return this.lastCPUCheckTime;
+    }
+
     public boolean isArchived() {
         return this.isArchived;
     }
@@ -123,13 +142,17 @@ public class CaptureSession {
         return this.crashReport;
     }
 
-    /**
-     * Sets the session id of the session.
-     * @param sessionId The session id.
-     */
     public void setSessionId(long sessionId) {
         this.sessionId = sessionId;
         this.notifyListeners(this);
+    }
+
+    public void setDeltaCPUTime(long deltaCPUTime) {
+        this.deltaCPUTime = deltaCPUTime;
+    }
+
+    public void setLastCPUCheckTime(long lastCPUCheckTime) {
+        this.lastCPUCheckTime = lastCPUCheckTime;
     }
 
     public void setGPUInformation(GPUInformation gpuInformation) {
@@ -193,6 +216,16 @@ public class CaptureSession {
 
         if(this.listeners.containsKey(clazz)) {
             this.listeners.get(clazz).forEach(e -> e.captured(data));
+        }
+    }
+
+    public void updateProcess() {
+        OSProcess[] processes = Main.getSystemInfo().getOperatingSystem().getProcesses(Integer.MAX_VALUE, OperatingSystem.ProcessSort.CPU);
+        for(OSProcess process : processes) {
+            if(process.getName().equalsIgnoreCase("StarCitizen") || process.getName().equalsIgnoreCase("starcitizen.exe")) {
+                this.process = process;
+                break;
+            }
         }
     }
 
