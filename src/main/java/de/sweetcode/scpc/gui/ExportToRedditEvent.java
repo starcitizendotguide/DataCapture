@@ -1,5 +1,6 @@
 package de.sweetcode.scpc.gui;
 
+import de.sweetcode.scpc.Main;
 import de.sweetcode.scpc.generator.RedditPostGenerator;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -27,8 +28,6 @@ public class ExportToRedditEvent implements EventHandler<ActionEvent> {
     @Override
     public void handle(ActionEvent event) {
 
-
-
         Platform.runLater(() -> {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Reddit Data Export");
@@ -38,7 +37,7 @@ public class ExportToRedditEvent implements EventHandler<ActionEvent> {
             response.ifPresent(e -> {
                 if(!e.getButtonData().isCancelButton()) {
                     String value = null;
-                    if(cache.containsKey(this.captureTab.getCaptureSession().getSessionId())) {
+                    if(cache.containsKey(this.captureTab.getCaptureSession().getSessionId()) && !Main.GENERAOTR_DISABLE_CACHE) {
                         if(cache.get(this.captureTab.getCaptureSession().getSessionId()).getSize() == captureTab.getCaptureSession().getDataPoints().size()) {
                             value = cache.get(this.captureTab.getCaptureSession().getSessionId()).getResponse();
                         }

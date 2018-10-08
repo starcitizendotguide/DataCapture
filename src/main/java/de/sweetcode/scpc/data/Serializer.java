@@ -97,6 +97,7 @@ public class Serializer {
         root.add("disk", diskObject);
         root.add("os", osObject);
         root.add("dataPoints", dataPointsArray);
+
         if(Main.FEATURE_CRASH_REPORT) {
             root.add("crashReport", crashInformationObject);
         }

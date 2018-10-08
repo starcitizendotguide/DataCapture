@@ -12,6 +12,7 @@ import org.pcap4j.core.*;
 import org.pcap4j.packet.IpV4Packet;
 import org.pcap4j.packet.IpV6Packet;
 import org.pcap4j.packet.Packet;
+import oshi.software.os.OSProcess;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -187,10 +188,22 @@ public class CaptureDevice implements Runnable {
                         //--- HEARTBEAT
                         case "heartbeat":
                             Platform.runLater(() -> {
-                                DataPoint dataPoint = new DataPoint(finalGameState, finalCaptureTab.getCaptureSession().getDataPoints().size());
+                                final int id = finalCaptureTab.getCaptureSession().getDataPoints().size();
+                                DataPoint dataPoint = new DataPoint(finalGameState, id);
                                 for (DataPoint.Type type : DataPoint.Types.values()) {
-                                    dataPoint.add(type, finalObject.get(type.getPacketKey()).getAsNumber());
+                                    if (type.isInPacket()) {
+                                        dataPoint.add(type, finalObject.get(type.getPacketKey()).getAsNumber());
+                                    }
                                 }
+
+                                if(Main.FEATURE_OSHI_HARDWARE_DETECTION) {
+                                    finalCaptureTab.getCaptureSession().getDiskInformation().updateProcess();
+                                    OSProcess process = finalCaptureTab.getCaptureSession().getDiskInformation().getProcess();
+                                    if(process != null) {
+                                        dataPoint.add(DataPoint.Types.MEMORY_USAGE, process.getResidentSetSize() * 1e-9);
+                                    }
+                                }
+
                                 finalCaptureTab.getCaptureSession().add(dataPoint);
                             });
                             break;

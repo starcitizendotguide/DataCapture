@@ -13,11 +13,16 @@ import java.util.Map;
 public class DiskInformation {
 
     private Map<DataPoint.Type, String> data = new LinkedHashMap<>();
+    private OSProcess process = null;
 
     public DiskInformation() {
         for(DataPoint.Type type : Types.values()) {
             this.data.put(type, "N/A");
         }
+    }
+
+    public OSProcess getProcess() {
+        return this.process;
     }
 
     public Map<DataPoint.Type, String> getData() {
@@ -44,24 +49,32 @@ public class DiskInformation {
             }
         }
 
+
+        this.updateProcess();
+        if (this.process != null) {
+
+            String[] pathSplit = process.getPath().split(":\\\\");
+
+            if(pathSplit.length > 0) {
+                final String mount = pathSplit[0];
+                HWDiskStore disk = partitions.get(mount);
+
+                if(disk != null) {
+                    String value = disk.getModel();
+                    if(value != null && !value.isEmpty()) {
+                        this.add(Types.DISK_NAME, value);
+                    }
+                }
+            }
+        }
+
+    }
+
+    public void updateProcess() {
         OSProcess[] processes = Main.getSystemInfo().getOperatingSystem().getProcesses(Integer.MAX_VALUE, OperatingSystem.ProcessSort.CPU);
         for(OSProcess process : processes) {
             if(process.getName().equalsIgnoreCase("StarCitizen") || process.getName().equalsIgnoreCase("starcitizen.exe")) {
-                String[] pathSplit = process.getPath().split(":\\\\");
-
-                if(pathSplit.length > 0) {
-                    final String mount = pathSplit[0];
-                    HWDiskStore disk = partitions.get(mount);
-
-                    if(disk != null) {
-                        String value = disk.getModel();
-                        if(value != null && !value.isEmpty()) {
-                            this.add(Types.DISK_NAME, value);
-                            System.out.print("");
-                        }
-                    }
-                }
-
+                this.process = process;
                 break;
             }
         }

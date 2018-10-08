@@ -168,7 +168,7 @@ public class CaptureSession {
     public void add(DataPoint dataPoint) {
         this.dataPoints.add(dataPoint);
         this.notifyListeners(dataPoint);
-        this.notifyListeners(dataPoint.getGameState());
+        this.notifyListeners(dataPoint.getGameState()); //:GameStateEvent
     }
 
     /**
@@ -186,7 +186,7 @@ public class CaptureSession {
 
         Class clazz = data.getClass();
 
-        //@HACKY: This is for enums that implement an interface like (GameStates).
+        //@HACKY: This is for enums that implement an interface like (GameStates). :GameStateEvent
         if(data instanceof Enum<?>) {
             clazz = data.getClass().getSuperclass().getInterfaces()[0];
         }

@@ -23,8 +23,14 @@ import java.util.concurrent.Executors;
 
 public class Main extends Application {
 
+    //--- FEATURE FLAGS
     public final static boolean FEATURE_CRASH_REPORT = false;
     public static final boolean FEATURE_OSHI_HARDWARE_DETECTION = true;
+
+    //--- FLAGS
+    public final static boolean GENERATOR_DISABLE_IMAGE_AND_DATA_EXPORT = false;
+    public final static boolean GENERAOTR_DISABLE_CACHE = false;
+    public final static boolean CAPTURE_TAB_DISABLE_DATA_LIMIT_TO_EXPORT = false;
 
     private final ExecutorService threadPool = Executors.newWorkStealingPool();
 

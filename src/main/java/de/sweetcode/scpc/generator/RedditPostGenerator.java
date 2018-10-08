@@ -2,6 +2,7 @@ package de.sweetcode.scpc.generator;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import de.sweetcode.scpc.Main;
 import de.sweetcode.scpc.data.*;
 import de.sweetcode.scpc.gui.BackgroundLineChart;
 import de.sweetcode.scpc.gui.CaptureTab;
@@ -12,10 +13,6 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.util.Base64;
-import java.util.Collections;
-import java.util.stream.Stream;
-
-import static de.sweetcode.scpc.data.Serializer.serialize;
 
 
 public class RedditPostGenerator {
@@ -90,54 +87,54 @@ public class RedditPostGenerator {
 
 
         //--- Screenshot
-        String graphLink = "Graph Image (Error)";
+        if(!Main.GENERATOR_DISABLE_IMAGE_AND_DATA_EXPORT) {
+            String graphLink = "Graph Image (Error)";
+            BufferedImage screenshot = captureTab.getCaptureSessionChart().screenshot(1920, 1080, BackgroundLineChart.BackgroundType.COLOUR);
+            final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            try {
+                ImageIO.write(screenshot, "png", outputStream);
+                String base64 = Base64.getEncoder().encodeToString(outputStream.toByteArray());
 
-        BufferedImage screenshot = captureTab.getCaptureSessionChart().screenshot(1920, 1080, BackgroundLineChart.BackgroundType.COLOUR);
-        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        try  {
-            ImageIO.write(screenshot, "png", outputStream);
-            String base64 = Base64.getEncoder().encodeToString(outputStream.toByteArray());
+                Request request = new Request.Builder()
+                        .url("https://api.imgur.com/3/image")
+                        .addHeader("Authorization", "Client-ID ced5163bd9b25b1")
+                        .post(new MultipartBody.Builder()
+                                .setType(MultipartBody.FORM)
+                                .addFormDataPart("image", base64)
+                                .build())
+                        .build();
 
-            Request request = new Request.Builder()
-                    .url("https://api.imgur.com/3/image")
-                    .addHeader("Authorization", "Client-ID ced5163bd9b25b1")
-                    .post(new MultipartBody.Builder()
-                            .setType(MultipartBody.FORM)
-                            .addFormDataPart("image", base64)
-                        .build())
-                .build();
-
-            Response response = client.newCall(request).execute();
-            JsonObject object = gson.fromJson(response.body().string(), JsonObject.class);
-
-            if(response.code() == 200 && object.has("success") && object.get("success").getAsBoolean()) {
-                graphLink = String.format("[Graph Image](%s)", object.getAsJsonObject("data").get("link").getAsString());
-            }
-        } catch (final Exception ex) {
-            ex.printStackTrace();
-        }
-
-        //--- Submit Data
-        String jsonLink = "Full Data Set (Error)";
-        try {
-            Request request = new Request.Builder()
-                    .url("https://api.myjson.com/bins")
-                    .post(RequestBody.create(MediaType.parse("application/json; charset=utf-8"), gson.toJson(Serializer.serialize(captureTab))))
-                    .build();
-
-            Response response = client.newCall(request).execute();
-            if(response.code() == 201) {
+                Response response = client.newCall(request).execute();
                 JsonObject object = gson.fromJson(response.body().string(), JsonObject.class);
-                if(object.has("uri")) {
-                    jsonLink = String.format("[Full Data Set](%s)", object.get("uri").getAsString());
+
+                if (response.code() == 200 && object.has("success") && object.get("success").getAsBoolean()) {
+                    graphLink = String.format("[Graph Image](%s)", object.getAsJsonObject("data").get("link").getAsString());
                 }
+            } catch (final Exception ex) {
+                ex.printStackTrace();
             }
-        } catch (Exception ex) {
-            ex.printStackTrace();
+
+            //--- Submit Data
+            String jsonLink = "Full Data Set (Error)";
+            try {
+                Request request = new Request.Builder()
+                        .url("https://api.myjson.com/bins")
+                        .post(RequestBody.create(MediaType.parse("application/json; charset=utf-8"), gson.toJson(Serializer.serialize(captureTab))))
+                        .build();
+
+                Response response = client.newCall(request).execute();
+                if (response.code() == 201) {
+                    JsonObject object = gson.fromJson(response.body().string(), JsonObject.class);
+                    if (object.has("uri")) {
+                        jsonLink = String.format("[Full Data Set](%s)", object.get("uri").getAsString());
+                    }
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
+            builder.append(String.format("____\n%s | %s", graphLink, jsonLink));
         }
-
-        builder.append(String.format("____\n%s | %s", graphLink, jsonLink));
-
 
         return builder.toString();
 
@@ -147,24 +144,42 @@ public class RedditPostGenerator {
         double[] fps = session.getDataPoints().stream().filter(e -> e.getGameState() == gameState).mapToDouble(
                 e -> e.getData(DataPoint.Types.FPS).getYValue().doubleValue()
         ).toArray();
+        double[] memory_usage = session.getDataPoints().stream().filter(e -> e.getGameState() == gameState).mapToDouble(
+                e -> e.getData(DataPoint.Types.MEMORY_USAGE).getYValue().doubleValue()
+        ).toArray();
 
         builder.append("\n");
-        builder.append(String.format("| FPS (%d DP) | %s |\n", fps.length, gameState.getName()));
-        builder.append("|:-----------|:------------:|\n");
+        builder.append(String.format("| %s (%d DP) | FPS  | Memory Usage |\n", gameState.getName(), fps.length));
+        builder.append("|:-----------|:------------:|:------------:|\n");
 
-        String mean = (fps.length > 0 ? String.format("%.2fFPS", StatUtils.mean(fps)) : "N/A");
-        String median = (fps.length > 0 ? String.format("%.2fFPS", StatUtils.percentile(fps, 50)) : "N/A");
-        String range = (fps.length > 0 ? String.format("[%.2f;%.2f]", StatUtils.min(fps), StatUtils.max(fps)) : "N/A");
-        String percentile_95 = (fps.length > 0 ? String.format("%.2fFPS", StatUtils.percentile(fps, 50)) : "N/A");
-        String percentile_99 = (fps.length > 0 ? String.format("%.2fFPS", StatUtils.percentile(fps, 99)) : "N/A");
-        String percentile_999 = (fps.length > 0 ? String.format("%.2fFPS", StatUtils.percentile(fps, 99.9)) : "N/A");
-
-        builder.append(String.format("|Mean|%s|\n", mean));
-        builder.append(String.format("|Median|%s|\n", median));
-        builder.append(String.format("|Range|%s|\n", range));
-        builder.append(String.format("|95%%|%s|\n", percentile_95));
-        builder.append(String.format("|99%%|%s|\n", percentile_99));
-        builder.append(String.format("|99.9%%|%s|\n", percentile_999));
+        builder.append(String.format("|Mean|%s|%s|\n",
+                (fps.length > 0 ? String.format("%.2fFPS", StatUtils.mean(fps)) : "N/A"),
+                (memory_usage.length > 0 ? String.format("%.2fGB", StatUtils.mean(memory_usage)) : "N/A")
+        ));
+        builder.append(String.format("|Median|%s|%s|\n",
+                (fps.length > 0 ? String.format("%.2fFPS", StatUtils.percentile(fps, 50)) : "N/A"),
+                (memory_usage.length > 0 ? String.format("%.2fGB", StatUtils.percentile(memory_usage, 50)) : "N/A")
+        ));
+        builder.append(String.format("|Range|%s|%s|\n",
+                (fps.length > 0 ? String.format("[%.2f;%.2f]", StatUtils.min(fps), StatUtils.max(fps)) : "N/A"),
+                (memory_usage.length > 0 ? String.format("[%.2f;%.2f]", StatUtils.min(memory_usage), StatUtils.max(memory_usage)) : "N/A")
+        ));
+        builder.append(String.format("|95%%|%s|%s|\n",
+                (fps.length > 0 ? String.format("%.2fFPS", StatUtils.percentile(fps, 5)) : "N/A"),
+                (memory_usage.length > 0 ? String.format("%.2fGB", StatUtils.percentile(memory_usage, 5)) : "N/A")
+        ));
+        builder.append(String.format("|93%%|%s|%s|\n",
+                (fps.length > 0 ? String.format("%.2fFPS", StatUtils.percentile(fps, 3)) : "N/A"),
+                (memory_usage.length > 0 ? String.format("%.2fGB", StatUtils.percentile(memory_usage, 3)) : "N/A")
+        ));
+        builder.append(String.format("|99%%|%s|%s|\n",
+                (fps.length > 0 ? String.format("%.2fFPS", StatUtils.percentile(fps, 1)) : "N/A"),
+                (memory_usage.length > 0 ? String.format("%.2fGB", StatUtils.percentile(memory_usage, 1)) : "N/A")
+        ));
+        builder.append(String.format("|99.9%%|%s|%s|\n",
+                (fps.length > 0 ? String.format("%.2fFPS", StatUtils.percentile(fps, 0.1)) : "N/A"),
+                (memory_usage.length > 0 ? String.format("%.2fGB", StatUtils.percentile(memory_usage, 0.1)) : "N/A")
+        ));
     }
 
 }

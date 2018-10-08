@@ -121,6 +121,11 @@ public class CaptureTab extends Tab {
                 exportMenuItem.setDisable(true);
                 fileMenu.getItems().add(exportMenuItem);
 
+                if(Main.CAPTURE_TAB_DISABLE_DATA_LIMIT_TO_EXPORT) {
+                    exportMenuItem.setDisable(false);
+                    exportMenuItem.setOnAction(new ExportToRedditEvent(this));
+                }
+
                 this.captureSession.addListener(DataPoint.class, dataPoint -> {
                     long size = this.captureSession.getDataPoints().stream().filter(
                             e -> e.getGameState() == GameStates.HANGAR ||

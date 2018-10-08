@@ -73,15 +73,15 @@ public class LoadFileActionEvent implements EventHandler<ActionEvent> {
 
                 //--- Data Points
                 JsonArray dataPointsArray = root.getAsJsonArray("dataPoints");
-                final boolean[] error = {false};
+                final boolean[] data_point_error = {false};
                 dataPointsArray.forEach((element) -> {
 
-                    if(error[0]) return;
+                    if(data_point_error[0]) return;
 
                     JsonObject object = element.getAsJsonObject();
 
                     if(!(object.has("index"))) {
-                        error[0] = true;
+                        data_point_error[0] = true;
                         Utils.popup("File - Load", "Invalid file. No 'index' found.", Alert.AlertType.ERROR, false);
                         return;
                     }
@@ -92,11 +92,13 @@ public class LoadFileActionEvent implements EventHandler<ActionEvent> {
                     DataPoint dataPoint = new DataPoint(gameState, index);
                     for (DataPoint.Type type : DataPoint.Types.values()) {
                         if(!(object.has("index"))) {
-                            error[0] = true;
+                            data_point_error[0] = true;
                             Utils.popup("File - Load", String.format("Invalid file. No '%s' found.", type.getSerializationKey()), Alert.AlertType.ERROR, false);
                             return;
                         }
-                        dataPoint.add(type, object.get(type.getSerializationKey()).getAsInt());
+                        if (object.has(type.getSerializationKey())) {
+                            dataPoint.add(type, object.get(type.getSerializationKey()).getAsNumber());
+                        }
                     }
                     captureSession.add(dataPoint);
                 });

@@ -144,6 +144,23 @@ public class DataPoint {
             public String getPacketKey() {
                 return "veh_count_player";
             }
+        },
+        MEMORY_USAGE {
+            @Override
+            public String getName() {
+                return "Memory Usage";
+            }
+
+            @Override
+            public String getSerializationKey() {
+                return "hw_memory_usage";
+            }
+
+            @Override
+            public String getPacketKey() {
+                return null;
+            }
+
         };
 
     }
@@ -155,6 +172,10 @@ public class DataPoint {
         String getSerializationKey();
 
         String getPacketKey();
+
+        default boolean isInPacket() {
+            return (this.getPacketKey() != null);
+        }
 
     }
 
