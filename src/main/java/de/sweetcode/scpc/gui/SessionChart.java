@@ -39,14 +39,17 @@ public abstract class SessionChart {
         }
 
         this.lineChart.setMinSize(screenshotWidth, screenshotHeight);
+        this.lineChart.setAnimated(false);
         this.lineChart.redraw();
 
         WritableImage writableImage = new WritableImage(screenshotWidth, screenshotHeight);
         this.lineChart.snapshot(new SnapshotParameters(), writableImage);
 
+        //--- Restore
         this.lineChart.setMinSize(0, 0);
         this.lineChart.setPrefSize(width, height);
         this.lineChart.setBackgroundType(oldBackgroundType);
+        this.lineChart.setAnimated(true);
         this.lineChart.redraw();
 
         return SwingFXUtils.fromFXImage(writableImage, null);

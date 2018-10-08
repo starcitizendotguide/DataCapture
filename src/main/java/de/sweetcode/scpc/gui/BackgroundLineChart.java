@@ -20,6 +20,7 @@ public class BackgroundLineChart extends LineChart<Number, Number> {
     public BackgroundLineChart(CaptureSession captureSession, Axis<Number> xAxis, Axis<Number> yAxis, ObservableList<Series<Number, Number>> data) {
         super(xAxis, yAxis, data);
         this.captureSession = captureSession;
+        this.getXAxis().isAutoRanging();
     }
 
     public void setBackgroundType(BackgroundType backgroundType) {
